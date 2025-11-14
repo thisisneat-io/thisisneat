@@ -121,9 +121,12 @@ class ValidateAPI:
         """
 
         import pyshacl
+        from thisisneat.core._constants import NEAT
 
         try:
-            self._state.instances.store.graph(NEAT.ValidationGraph).parse(data=io)
+            validation_graph = self._state.instances.store.graph(NEAT.ValidationGraph)
+            validation_graph.remove((None, None, None))
+            validation_graph.parse(data=io)
 
         except Exception:
             self._state.instances.store.graph(NEAT.ValidationGraph).parse(io)
@@ -131,8 +134,6 @@ class ValidateAPI:
         conforms, report_graph, report_text = pyshacl.validate(
             data_graph=self._state.instances.store.graph(),
             shacl_graph=self._state.instances.store.graph(NEAT.ValidationGraph),
-            inference="rdfs",
-            debug=False,
             serialize_report_graph="ttl",
         )
         return conforms, report_graph.decode("utf-8"), report_text
