@@ -1,0 +1,2637 @@
+{
+    "items": {
+      "n": [
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "p_and_id_parser",
+          "createdTime": 1758784632241,
+          "lastUpdatedTime": 1758784632241,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "name": "P&ID Parser",
+                "description": "Creates annotations for P&ID diagrams which are used to connect nodes."
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "2769816095303562",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "REVIEW OF SIS LOP CONTROLLERS PERFORMANCE (*** month)",
+                "description": "Performance review of IPL BPCS control loops credited in *** ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Kan føre til produksjonsstans (utføres innen *** dager)",
+                "startTime": "2017-08-27T00:00:00+00:00",
+                "scheduledEndTime": "2017-09-25T00:00:00+00:00",
+                "scheduledStartTime": "2017-10-26T07:00:00+00:00",
+                "sourceCreatedTime": "2017-05-04T09:37:30+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "8231453921306303",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "REVIEW OF SIS LOP CONTROLLERS PERFORMANCE (*** month)",
+                "description": "Performance review of IPL BPCS control loops credited in *** ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Kan føre til produksjonsstans (utføres innen *** dager)",
+                "startTime": "2017-11-27T00:00:00+00:00",
+                "scheduledEndTime": "2017-12-26T00:00:00+00:00",
+                "scheduledStartTime": "2017-11-27T07:00:00+00:00",
+                "sourceCreatedTime": "2017-09-01T15:04:49+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "1760416351578870",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR UNITECH FOR *** SYSTEM (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CPM) for Unitech, for ***- surveillanced equipment. ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2017-12-09T18:22:39+00:00",
+                "startTime": "2017-12-01T00:00:00+00:00",
+                "scheduledEndTime": "2017-12-30T00:00:00+00:00",
+                "scheduledStartTime": "2017-12-01T07:00:00+00:00",
+                "sourceCreatedTime": "2017-09-01T15:04:49+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "7588570523375314",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "PH *** TRINNS *** ***-FSL-*** LIGGER *** *** SELV OM *** GÅR",
+                "description": "PH *** TRINNS *** ***-FSL-*** LIGGER *** *** SELV OM *** GÅR. Alarm er *** og ligger *** ***. ***",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Kan føre til produksjonsstans (utføres innen *** dager)",
+                "endTime": "2017-12-10T08:16:20+00:00",
+                "startTime": "2017-12-07T00:00:00+00:00",
+                "scheduledEndTime": "2018-01-19T00:00:00+00:00",
+                "scheduledStartTime": "2017-12-07T07:00:00+00:00",
+                "sourceCreatedTime": "2017-11-21T15:52:57+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "6891919304573028",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "*** NDE MOTOR , ***",
+                "description": "",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2017-12-20T06:49:35+00:00",
+                "startTime": "2017-12-06T07:00:00+00:00",
+                "scheduledEndTime": "2018-03-13T00:00:00+00:00",
+                "scheduledStartTime": "2017-12-14T07:00:00+00:00",
+                "sourceCreatedTime": "2017-10-13T08:32:18+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "1833697084044030",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "PH ***.*** ***. LØSE/*** INSTRUMENT ***",
+                "description": "",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Kan føre til produksjonsstans (utføres innen *** dager)",
+                "endTime": "2018-01-15T09:44:19+00:00",
+                "startTime": "2017-12-24T00:00:00+00:00",
+                "scheduledEndTime": "2018-01-25T00:00:00+00:00",
+                "scheduledStartTime": "2018-01-11T07:00:00+00:00",
+                "sourceCreatedTime": "2017-11-27T18:00:59+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "5392917852778726",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> INSPEKSJON AV PSV (*** month)",
+                "description": "",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-01-24T08:57:42+00:00",
+                "startTime": "2017-10-29T00:00:00+00:00",
+                "scheduledEndTime": "2018-01-26T00:00:00+00:00",
+                "scheduledStartTime": "2018-01-18T07:00:00+00:00",
+                "sourceCreatedTime": "2017-09-01T14:50:32+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "5528253487252292",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> SMØREOLJEPRØVE KOMPRESSORER  (*** month)",
+                "description": "",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-01-26T08:08:02+00:00",
+                "startTime": "2018-01-26T00:00:00+00:00",
+                "scheduledEndTime": "2018-02-24T00:00:00+00:00",
+                "scheduledStartTime": "2018-01-26T07:00:00+00:00",
+                "sourceCreatedTime": "2017-11-09T13:19:14+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "4372016025575193",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR UNITECH FOR *** SYSTEM (*** month)",
+                "description": "",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-02-05T10:44:19+00:00",
+                "startTime": "2018-02-01T00:00:00+00:00",
+                "scheduledEndTime": "2018-03-02T00:00:00+00:00",
+                "scheduledStartTime": "2018-02-01T07:00:00+00:00",
+                "sourceCreatedTime": "2017-11-01T10:34:16+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "6364173779931236",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "DRENERING AV LUBE OIL ***,***,*** OG *** TRINN KOMPRESSOR SEAL (*** month",
+                "description": "Drenering av lube oil ***,***,*** og *** trinn kompressor seal.  Drenering av lube oil kompressorer ***,***,*** og *** trinn",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-02-07T20:03:08+00:00",
+                "startTime": "2018-02-01T00:00:00+00:00",
+                "scheduledEndTime": "2018-03-02T00:00:00+00:00",
+                "scheduledStartTime": "2018-02-08T07:00:00+00:00",
+                "sourceCreatedTime": "2018-02-01T07:22:11+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "8243556955873832",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "***. *** <PH> INSPEKSJON AV PSV (*** MONTH)",
+                "description": "INSPEKSJON AV PSV ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-02-26T08:49:05+00:00",
+                "startTime": "2017-12-01T07:00:00+00:00",
+                "scheduledEndTime": "2018-02-28T00:00:00+00:00",
+                "scheduledStartTime": "2018-02-22T07:00:00+00:00",
+                "sourceCreatedTime": "2017-09-01T14:49:59+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "8509375819796919",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> INSPEKSJON AV PSV (*** month)",
+                "description": "Inspeksjon av PSV ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Kan føre til produksjonsstans (utføres innen *** dager)",
+                "endTime": "2018-02-22T08:04:20+00:00",
+                "startTime": "2017-11-21T00:00:00+00:00",
+                "scheduledEndTime": "2018-02-18T00:00:00+00:00",
+                "scheduledStartTime": "2018-02-22T07:00:00+00:00",
+                "sourceCreatedTime": "2017-09-01T15:00:05+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "6182622627355277",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> INSPEKSJON AV PSV (*** month)",
+                "description": "INSPEKSJON AV PSV ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2012-11-02T14:15:18+00:00",
+                "startTime": "2012-12-29T00:00:00+00:00",
+                "scheduledEndTime": "2013-02-26T00:00:00+00:00",
+                "scheduledStartTime": "2012-12-29T07:00:00+00:00",
+                "sourceCreatedTime": "2012-10-22T14:23:05+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "1702257273868980",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "PH,ID, *** *** *** *** ***-TT-***",
+                "description": "*** er *** *** ***. ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Fare for produksjonsstans (utføres innen *** dager)",
+                "endTime": "2018-05-16T15:30:20+00:00",
+                "startTime": "2018-05-15T00:00:00+00:00",
+                "scheduledEndTime": "2018-05-18T00:00:00+00:00",
+                "sourceCreatedTime": "2018-05-12T23:04:12+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "7661630265579671",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": " ***  *** FOR *** AV *** PÅ ***",
+                "description": "",
+                "type": "MAI",
+                "status": "300",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2018-05-03T00:00:00+00:00",
+                "scheduledEndTime": "2018-08-21T00:00:00+00:00",
+                "scheduledStartTime": "2018-05-24T07:00:00+00:00",
+                "sourceCreatedTime": "2018-02-04T09:19:14+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "376134406695173",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "DRENERING AV LUBE OIL ***,***,*** OG *** TRINN KOMPRESSOR SEAL (*** month",
+                "description": "Drenering av lube oil ***,***,*** og *** trinn kompressor seal.  Drenering av lube oil kompressorer ***,***,*** og *** trinn",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-06-03T02:42:39+00:00",
+                "startTime": "2018-06-01T00:00:00+00:00",
+                "scheduledEndTime": "2018-06-30T00:00:00+00:00",
+                "scheduledStartTime": "2018-06-01T07:00:00+00:00",
+                "sourceCreatedTime": "2018-04-04T08:53:14+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "1136393245443340",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> *** - *** - *** *** (*** month)",
+                "description": "Vedlikehold av ***-/*** for kompressor ***-KA-*** ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-06-12T18:57:26+00:00",
+                "startTime": "2018-04-01T00:00:00+00:00",
+                "scheduledEndTime": "2018-06-29T00:00:00+00:00",
+                "scheduledStartTime": "2018-06-07T07:00:00+00:00",
+                "sourceCreatedTime": "2018-02-01T09:21:35+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "6420341741100821",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "*** PH. *** *** ***.***. BYTTE *** ",
+                "description": "*** ***  *** sitter fast må byttes.Deler må *** og *** slik at vi kan bytte på en *** måtte.Loop er *** dag ok. Ingen isolering *** fra drift.",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-06-25T09:33:32+00:00",
+                "startTime": "2018-06-28T07:00:00+00:00",
+                "scheduledEndTime": "2018-09-19T00:00:00+00:00",
+                "scheduledStartTime": "2018-06-22T08:00:00+00:00",
+                "sourceCreatedTime": "2017-09-20T17:17:36+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "8699171031994372",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "*** <PH> INSTRUMENTERING *** *** (*** MONTH)",
+                "description": "INSTRUMENTERING *** *** *** og rutiner *** - Suppress ***",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-06-24T20:51:33+00:00",
+                "startTime": "2018-08-06T00:00:00+00:00",
+                "scheduledEndTime": "2018-10-04T00:00:00+00:00",
+                "scheduledStartTime": "2018-06-22T08:00:00+00:00",
+                "sourceCreatedTime": "2017-11-02T08:35:08+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "5211969177755208",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR UNITECH FOR *** SYSTEM (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CPM) for Unitech, for ***- surveillanced equipment. ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-07-02T12:42:12+00:00",
+                "startTime": "2018-07-01T00:00:00+00:00",
+                "scheduledEndTime": "2018-07-30T00:00:00+00:00",
+                "scheduledStartTime": "2018-07-01T07:00:00+00:00",
+                "sourceCreatedTime": "2018-04-04T09:00:52+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "3946500007546378",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR UNITECH FOR *** SYSTEM (*** month)",
+                "description": "",
+                "type": "MAI",
+                "status": "290",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2018-07-01T00:00:00+00:00",
+                "scheduledEndTime": "2018-07-30T00:00:00+00:00",
+                "scheduledStartTime": "2018-07-01T07:00:00+00:00",
+                "sourceCreatedTime": "2018-04-04T09:00:52+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "2392657392728966",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "PH (***) - *** AV LÅSTE VENTILER (*** month)",
+                "description": "Inspeksjon av låste ventiler mhp Locked Open (LO), Locked Closed (LC), Car Seal Open (CSO) og Car Seal Closed (CSC). (Tubingventiler på trykktransmitterne skal sjekkes) ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-07-07T23:25:40+00:00",
+                "startTime": "2018-07-07T00:00:00+00:00",
+                "scheduledEndTime": "2018-09-04T00:00:00+00:00",
+                "scheduledStartTime": "2018-07-07T07:00:00+00:00",
+                "sourceCreatedTime": "2018-04-04T13:54:40+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "1105379191924281",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> SMØREOLJEPRØVE KOMPRESSORER  (*** month)",
+                "description": "Smøreoljeprøve kompressorer  ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-07-21T21:34:16+00:00",
+                "startTime": "2018-07-26T00:00:00+00:00",
+                "scheduledEndTime": "2018-08-24T00:00:00+00:00",
+                "scheduledStartTime": "2018-07-26T07:00:00+00:00",
+                "sourceCreatedTime": "2018-06-15T08:26:12+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "3104041972544119",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> INSTRUMENTERING *** *** (*** month)",
+                "description": "INSTRUMENTERING *** *** *** og rutiner *** - Suppress ***",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2018-08-06T00:00:00+00:00",
+                "scheduledEndTime": "2018-10-04T00:00:00+00:00",
+                "scheduledStartTime": "2018-08-06T07:00:00+00:00",
+                "sourceCreatedTime": "2017-10-05T15:08:13+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "3041204074758105",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> INSPEKSJON AV PSV (*** month)",
+                "description": "INSPEKSJON AV PSV ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-09-04T18:38:25+00:00",
+                "startTime": "2018-08-29T00:00:00+00:00",
+                "scheduledEndTime": "2018-11-26T00:00:00+00:00",
+                "scheduledStartTime": "2018-08-30T07:00:00+00:00",
+                "sourceCreatedTime": "2018-06-18T09:05:01+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "4136339281804205",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "COND.MON FOR CRITICAL ESD & *** VALVES (*** month)",
+                "description": "ONSHORE JOB - CM Program for Critical ESD & *** Valves. ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-10-29T15:26:58+00:00",
+                "startTime": "2018-10-01T00:00:00+00:00",
+                "scheduledEndTime": "2018-10-30T00:00:00+00:00",
+                "scheduledStartTime": "2018-10-01T07:00:00+00:00",
+                "sourceCreatedTime": "2018-06-18T08:46:20+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "7495954758382297",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "DRENERING AV LUBE OIL *** TRINN KOMPRESSOR SEAL (*** MONTH",
+                "description": "Drenering av lube oil *** kompressor seal.  Drenering av lube oil kompressorer ***,",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2018-11-04T03:17:59+00:00",
+                "startTime": "2018-11-01T00:00:00+00:00",
+                "scheduledEndTime": "2018-11-30T00:00:00+00:00",
+                "scheduledStartTime": "2018-11-01T07:00:00+00:00",
+                "sourceCreatedTime": "2018-09-05T11:36:22+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "1161466478750492",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "REVIEW OF SIS LOP CONTROLLERS PERFORMANCE (*** month)",
+                "description": "Performance review of IPL BPCS control loops credited in *** ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Kan føre til produksjonsstans (utføres innen *** dager)",
+                "startTime": "2018-11-27T00:00:00+00:00",
+                "scheduledEndTime": "2018-12-26T00:00:00+00:00",
+                "scheduledStartTime": "2018-11-27T07:00:00+00:00",
+                "sourceCreatedTime": "2018-09-05T11:42:37+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "3575211983819395",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "PH ID *** SCRUBBER ***-ESDV-*** HAR FEIL PÅ ***",
+                "description": "***-ESDV-*** har feil på ***. Når ventilen står *** *** *** *** *** og vi får *** på ventilen. *** er *** *** ha dårlig kontakt *** felt.",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Kan føre til produksjonsstans (utføres innen *** dager)",
+                "endTime": "2018-12-20T10:25:39+00:00",
+                "startTime": "2018-12-21T00:00:00+00:00",
+                "scheduledEndTime": "2019-01-28T00:00:00+00:00",
+                "scheduledStartTime": "2018-12-20T07:00:00+00:00",
+                "sourceCreatedTime": "2018-11-30T11:10:58+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "8782460235742566",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "***-VA-***-M01, *** MOTOR",
+                "description": "",
+                "type": "MAI",
+                "status": "400",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2015-11-19T07:00:00+00:00",
+                "scheduledEndTime": "2019-03-30T00:00:00+00:00",
+                "scheduledStartTime": "2018-12-31T07:00:00+00:00",
+                "sourceCreatedTime": "2015-07-15T14:17:40+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "4403096147497812",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR BP FOR ROTATING EQUIPMENT (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for BP for rotating equipment ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2013-01-01T00:00:00+00:00",
+                "scheduledEndTime": "2013-01-30T00:00:00+00:00",
+                "scheduledStartTime": "2013-01-31T07:00:00+00:00",
+                "sourceCreatedTime": "2012-11-16T16:18:10+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "1657577607861538",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "PH(***)- *** AV INTERLOCK VENTILER (*** month)",
+                "description": "Inspeksjon av forriglinger og låste ventiler -PH ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2019-01-16T00:04:06+00:00",
+                "startTime": "2019-01-21T00:00:00+00:00",
+                "scheduledEndTime": "2019-03-21T00:00:00+00:00",
+                "scheduledStartTime": "2019-01-10T07:00:00+00:00",
+                "sourceCreatedTime": "2018-11-05T13:28:08+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "3748262532451267",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR *** FOR CONTROL VALVES (***) (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for *** for Control Valves (***) ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2013-01-01T00:00:00+00:00",
+                "scheduledEndTime": "2013-01-30T00:00:00+00:00",
+                "scheduledStartTime": "2013-01-31T07:00:00+00:00",
+                "sourceCreatedTime": "2012-11-16T16:18:13+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "3786621596067193",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> VEDLIKEHOLD AV PSD VENTILER *** (*** month)",
+                "description": "Vedlikehold av PSD ventiler *** ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2019-03-17T09:24:35+00:00",
+                "startTime": "2019-03-19T00:00:00+00:00",
+                "scheduledEndTime": "2019-05-17T00:00:00+00:00",
+                "scheduledStartTime": "2019-03-19T07:00:00+00:00",
+                "sourceCreatedTime": "2018-11-20T12:55:48+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "5625316418703702",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "COND.MON FOR CRITICAL ESD & *** VALVES (*** month)",
+                "description": "ONSHORE JOB - CM Program for Critical ESD & *** Valves. ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2019-04-30T17:05:04+00:00",
+                "startTime": "2019-04-04T07:00:00+00:00",
+                "scheduledEndTime": "2019-05-03T00:00:00+00:00",
+                "scheduledStartTime": "2019-04-04T07:00:00+00:00",
+                "sourceCreatedTime": "2019-03-06T08:23:34+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "4653352429720678",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "PH: *** - VEDLIKEHOLD AV VENT FOR COMPRESSOR",
+                "description": "***) ***) Skifte *** bolter for ***.***) Bytte *** ***. ",
+                "type": "MAI",
+                "status": "290",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2016-03-01T00:00:00+00:00",
+                "scheduledEndTime": "2019-07-08T00:00:00+00:00",
+                "scheduledStartTime": "2019-04-10T07:00:00+00:00",
+                "sourceCreatedTime": "2015-10-08T13:45:38+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "457710278504205",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR GE BN SYSTEM *** AND TRENDMASTER (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for GE for rotating equipment (BN System1 and TredmasterPro.) ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2019-05-07T13:52:22+00:00",
+                "startTime": "2019-05-01T00:00:00+00:00",
+                "scheduledEndTime": "2019-05-30T00:00:00+00:00",
+                "scheduledStartTime": "2019-05-01T07:00:00+00:00",
+                "sourceCreatedTime": "2019-03-06T08:23:34+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "7300774541257107",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR UNITECH FOR *** SYSTEM (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CPM) for Unitech, for ***- surveillanced equipment. ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2019-06-05T10:36:47+00:00",
+                "startTime": "2019-06-01T00:00:00+00:00",
+                "scheduledEndTime": "2019-06-30T00:00:00+00:00",
+                "scheduledStartTime": "2019-06-01T07:00:00+00:00",
+                "sourceCreatedTime": "2019-03-06T08:23:34+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "1842894004934486",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "DRENERING AV LUBE OIL ***,***,*** OG *** TRINN KOMPRESSOR SEAL (*** month",
+                "description": "Drenering av lube oil ***,***,*** og *** trinn kompressor seal.  Drenering av lube oil kompressorer ***,***,*** og *** trinn",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2019-06-01T00:00:00+00:00",
+                "scheduledEndTime": "2019-06-30T00:00:00+00:00",
+                "scheduledStartTime": "2019-06-01T07:00:00+00:00",
+                "sourceCreatedTime": "2019-03-06T08:41:45+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "1914064578529290",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "***  *** FOR *** AV *** PÅ ***",
+                "description": "Det er lagt opp *** for *** kunne *** *** for *** etter at N2 har vært isolert *** ***.*** en shutdown.Dette har kun vært gjort for en test.Da dette nå skal være *** må dette *** *** opp og *** ***.",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2019-06-16T18:49:56+00:00",
+                "startTime": "2018-05-03T00:00:00+00:00",
+                "scheduledEndTime": "2019-09-04T00:00:00+00:00",
+                "scheduledStartTime": "2019-06-07T07:00:00+00:00",
+                "sourceCreatedTime": "2018-02-04T09:19:14+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "2182798706069553",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "***, DETEKSJON AV GASSLEKKASJER (*** month)",
+                "description": "INSPEKSJON AV VALHALL FOR GASSLEKKASJER ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2019-07-24T04:30:42+00:00",
+                "startTime": "2019-06-25T00:00:00+00:00",
+                "scheduledEndTime": "2019-08-23T00:00:00+00:00",
+                "scheduledStartTime": "2019-07-18T07:00:00+00:00",
+                "sourceCreatedTime": "2019-03-06T08:43:02+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "7037597442388497",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "*** PH ***-***-SYSTEM ***, DISCHARGE COOLERS ***. (*** MONTH)",
+                "description": "Innvendig inspeksjon av ***. trinns Discharge *** *** og *** *** *** og *** ***. Utføres med *** *** av *** ved *** av *** og *** av *** *** *** S1",
+                "type": "INSP",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2019-08-12T11:06:06+00:00",
+                "startTime": "2019-07-01T00:00:00+00:00",
+                "scheduledEndTime": "2019-09-28T00:00:00+00:00",
+                "scheduledStartTime": "2019-07-28T07:00:00+00:00",
+                "sourceCreatedTime": "2018-06-04T10:10:11+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "2585728176891283",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "SJEKK AV *** LEKKASJE (*** ***)",
+                "description": "Sjekk av *** Lekkasje ***  ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2019-08-13T00:00:00+00:00",
+                "scheduledEndTime": "2019-09-11T00:00:00+00:00",
+                "scheduledStartTime": "2019-08-13T07:00:00+00:00",
+                "sourceCreatedTime": "2019-05-03T15:41:01+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "6530310166356312",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR GE BN SYSTEM *** AND TRENDMASTER (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for GE for rotating equipment (BN System1 and TredmasterPro.) ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2019-10-10T09:35:48+00:00",
+                "startTime": "2019-10-01T00:00:00+00:00",
+                "scheduledEndTime": "2019-10-30T00:00:00+00:00",
+                "scheduledStartTime": "2019-10-01T07:00:00+00:00",
+                "sourceCreatedTime": "2019-07-05T14:26:18+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "7411627037784521",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "PH *** TRINN *** *** ",
+                "description": "feil på *** ventil. Ligger *** på ***% ***. ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Fare for produksjonsstans (utføres innen *** dager)",
+                "endTime": "2019-10-07T09:46:10+00:00",
+                "startTime": "2019-09-16T07:00:00+00:00",
+                "scheduledEndTime": "2019-09-22T00:00:00+00:00",
+                "scheduledStartTime": "2019-10-02T07:00:00+00:00",
+                "sourceCreatedTime": "2019-09-16T07:04:37+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "563973119546478",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> SMØREOLJEPRØVE KOMPRESSORER  (*** month)",
+                "description": "Smøreoljeprøve kompressorer  ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2019-10-23T18:28:12+00:00",
+                "startTime": "2019-10-26T00:00:00+00:00",
+                "scheduledEndTime": "2019-11-24T00:00:00+00:00",
+                "scheduledStartTime": "2019-10-26T07:00:00+00:00",
+                "sourceCreatedTime": "2019-07-05T15:07:12+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "4457564185053981",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "PH: *** TRANSMITTER LIGGER MED HOT BACKUP",
+                "description": "Transmitter ligger med hot backup alarm. ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2019-11-18T09:27:10+00:00",
+                "startTime": "2019-11-15T00:00:00+00:00",
+                "scheduledEndTime": "2020-02-06T00:00:00+00:00",
+                "scheduledStartTime": "2019-11-09T07:00:00+00:00",
+                "sourceCreatedTime": "2018-12-22T10:22:50+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "4061559960153823",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "PH (***) - *** AV LÅSTE VENTILER (*** month)",
+                "description": "Inspeksjon av låste ventiler mhp Locked Open (LO), Locked Closed (LC), Car Seal Open (CSO) og Car Seal Closed (CSC). (Tubingventiler på trykktransmitterne skal sjekkes) ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2019-11-08T23:35:42+00:00",
+                "startTime": "2019-11-12T00:00:00+00:00",
+                "scheduledEndTime": "2020-01-10T00:00:00+00:00",
+                "scheduledStartTime": "2019-11-12T07:00:00+00:00",
+                "sourceCreatedTime": "2019-09-23T08:49:19+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "1189438653112731",
+          "createdTime": 1758799374814,
+          "lastUpdatedTime": 1758799374814,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR UNITECH FOR *** SYSTEM (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CPM) for Unitech, for ***- surveillanced equipment. ",
+                "type": "MAI",
+                "status": "290",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2020-02-01T00:00:00+00:00",
+                "scheduledEndTime": "2020-03-01T00:00:00+00:00",
+                "scheduledStartTime": "2020-02-01T07:00:00+00:00",
+                "sourceCreatedTime": "2019-09-23T09:17:53+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "3956848631026290",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> SMØREOLJEPRØVE KOMPRESSORER  (*** month)",
+                "description": "Smøreoljeprøve kompressorer  ",
+                "type": "MAI",
+                "status": "300",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2020-01-26T00:00:00+00:00",
+                "scheduledEndTime": "2020-02-24T00:00:00+00:00",
+                "scheduledStartTime": "2020-02-09T07:00:00+00:00",
+                "sourceCreatedTime": "2019-11-29T09:58:26+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "3276899182329320",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "BYTTE ***. TRINNS KOMPRESSOR MOTOR",
+                "description": "Bytte ***.trinns kompressor motor",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2013-11-08T07:57:50+00:00",
+                "startTime": "2014-01-01T00:00:00+00:00",
+                "scheduledEndTime": "2014-06-29T00:00:00+00:00",
+                "sourceCreatedTime": "2013-02-26T10:11:57+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "3231365152946323",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR GE BN SYSTEM *** AND TRENDMASTER (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for GE for rotating equipment (BN System1 and TredmasterPro.) ",
+                "type": "MAI",
+                "status": "290",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2020-04-01T00:00:00+00:00",
+                "scheduledEndTime": "2020-04-30T00:00:00+00:00",
+                "scheduledStartTime": "2020-04-01T07:00:00+00:00",
+                "sourceCreatedTime": "2019-09-23T09:17:50+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "7535075708029093",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "*** VENTILER: KONTROLL AV *** (*** month)",
+                "description": "Alle *** Anti-surge ventilene har dårlig historikk *** forhold til lekkasje *** ***:   Kontroll av *** *** ***. ",
+                "type": "MAI",
+                "status": "300",
+                "priorityDescription": "Kan føre til produksjonsstans (utføres innen *** dager)",
+                "startTime": "2020-05-11T00:00:00+00:00",
+                "scheduledEndTime": "2020-06-09T00:00:00+00:00",
+                "scheduledStartTime": "2020-05-25T07:00:00+00:00",
+                "sourceCreatedTime": "2019-11-12T11:27:41+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "4375848418904931",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "*** SIKKERHETSKRITISK INSTRUMENTERING SYSTEM *** (*** MONTH)",
+                "description": "Funksjonstest av sikkerhetskritisk instrumentering system *** *** og rutiner *** - Suppress ***",
+                "type": "MAI",
+                "status": "300",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2020-08-05T00:00:00+00:00",
+                "scheduledEndTime": "2020-10-03T00:00:00+00:00",
+                "scheduledStartTime": "2020-08-05T07:00:00+00:00",
+                "sourceCreatedTime": "2019-11-05T14:25:24+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "7484590419152901",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR GE BN SYSTEM *** AND TRENDMASTER (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for GE for rotating equipment (BN System1 and TredmasterPro.) ",
+                "type": "MAI",
+                "status": "290",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2020-11-01T00:00:00+00:00",
+                "scheduledEndTime": "2020-11-30T00:00:00+00:00",
+                "scheduledStartTime": "2020-11-01T07:00:00+00:00",
+                "sourceCreatedTime": "2019-09-23T09:17:52+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "1778724645757103",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> VEDLIKEHOLD AV ESDV VENTIL (*** month)",
+                "description": "Årlig ***- og *** av ESDV ventil ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2013-03-18T08:20:44+00:00",
+                "startTime": "2013-01-26T00:00:00+00:00",
+                "scheduledEndTime": "2013-03-26T00:00:00+00:00",
+                "scheduledStartTime": "2013-03-14T07:00:00+00:00",
+                "sourceCreatedTime": "2012-11-30T10:57:04+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "8246407380713680",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": " ",
+                "description": "INSTALLASJON - H05 SPOOL ***-***-***-*** MC: ***-***",
+                "type": "MOD",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2010-01-22T17:52:25+00:00",
+                "startTime": "2009-06-26T00:00:00+00:00",
+                "sourceCreatedTime": "2009-04-28T14:08:39+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "8763035906909225",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR BP FOR ROTATING EQUIPMENT (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for BP for rotating equipment ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2013-04-01T00:00:00+00:00",
+                "scheduledEndTime": "2013-04-30T00:00:00+00:00",
+                "scheduledStartTime": "2013-04-01T07:00:00+00:00",
+                "sourceCreatedTime": "2013-01-23T16:39:09+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "5375015553371097",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "***-INSTALLASJON - H05 SPOOL ***-OF-***-*** MC: ***",
+                "description": "INSTALLASJON - H05 SPOOL ***-OF-***-*** MC: ***-***",
+                "type": "MOD",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2009-12-18T21:08:46+00:00",
+                "startTime": "2009-06-26T00:00:00+00:00",
+                "sourceCreatedTime": "2009-04-28T14:14:46+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "5418277209903121",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "FEIL *** FOR *** FRA CCC",
+                "description": "*** fra CCC *** har feil ***. Se *** ***.",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Kan føre til produksjonsstans (utføres innen *** dager)",
+                "endTime": "2013-05-11T16:53:05+00:00",
+                "startTime": "2013-05-09T00:00:00+00:00",
+                "scheduledEndTime": "2013-07-06T00:00:00+00:00",
+                "sourceCreatedTime": "2013-05-08T09:08:41+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "8741320399405352",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "PH. *** TR ***. *** LEKKASJE *** *** ***",
+                "description": "PH. *** TR ***. *** LEKKASJE *** *** ***. Denne må *** ***, og *** *** av kompressor. Det er *** ***/*** rør på *** som lekker.",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Fare for produksjonsstans (utføres innen *** dager)",
+                "endTime": "2013-07-07T09:26:56+00:00",
+                "startTime": "2013-07-06T00:00:00+00:00",
+                "scheduledEndTime": "2013-07-12T00:00:00+00:00",
+                "sourceCreatedTime": "2013-07-06T03:04:42+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "8771664911395233",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR SKF (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for SKF for Oil Analysis and SW Pumps Vibration ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2013-07-01T00:00:00+00:00",
+                "scheduledEndTime": "2013-07-30T00:00:00+00:00",
+                "scheduledStartTime": "2013-07-25T07:00:00+00:00",
+                "sourceCreatedTime": "2013-04-19T09:05:10+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "6886243742904612",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR BP FOR CONTROL VALVES (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for BP Engineering for Control Valves (***) ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Kan føre til produksjonsstans (utføres innen *** dager)",
+                "startTime": "2013-09-01T00:00:00+00:00",
+                "scheduledEndTime": "2013-09-30T00:00:00+00:00",
+                "scheduledStartTime": "2013-09-01T07:00:00+00:00",
+                "sourceCreatedTime": "2013-07-14T22:39:46+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "8288622522383973",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> INSPEKSJON AV PSV (*** month)",
+                "description": "INSPEKSJON AV PSV ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2013-09-10T10:34:12+00:00",
+                "startTime": "2013-08-13T00:00:00+00:00",
+                "scheduledEndTime": "2013-10-11T00:00:00+00:00",
+                "scheduledStartTime": "2013-09-07T07:00:00+00:00",
+                "sourceCreatedTime": "2013-07-14T22:15:26+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "7500764631542010",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "*** VRD *** *** ***- *** TO *** *** *** SYSTEM ***",
+                "description": "*** *** to *** *** *** *** on System *** (*** JK ***)",
+                "type": "MAI",
+                "status": "275",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2018-12-31T00:00:00+00:00",
+                "scheduledEndTime": "2019-06-28T00:00:00+00:00",
+                "sourceCreatedTime": "2013-09-10T16:25:03+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "2742816937603803",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR BP FOR CONTROL VALVES (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for BP Engineering for Control Valves (***) ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Kan føre til produksjonsstans (utføres innen *** dager)",
+                "startTime": "2013-10-01T00:00:00+00:00",
+                "scheduledEndTime": "2013-10-30T00:00:00+00:00",
+                "scheduledStartTime": "2013-10-03T07:00:00+00:00",
+                "sourceCreatedTime": "2013-07-14T23:15:31+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "7351181327000043",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> ***. AV EX UTSTYR-***.-*** DECK *** AREA (*** ***",
+                "description": "Kontroll av EX Utstyr - Instrument - *** Deck Production Area ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2013-11-06T08:55:06+00:00",
+                "startTime": "2013-09-10T00:00:00+00:00",
+                "scheduledEndTime": "2013-11-08T00:00:00+00:00",
+                "scheduledStartTime": "2013-10-31T07:00:00+00:00",
+                "sourceCreatedTime": "2013-07-14T22:52:49+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "6068542168620034",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR *** FOR CONTROL VALVES (***) (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for *** for Control Valves (***) ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2013-11-01T00:00:00+00:00",
+                "scheduledEndTime": "2013-11-30T00:00:00+00:00",
+                "scheduledStartTime": "2013-11-14T07:00:00+00:00",
+                "sourceCreatedTime": "2013-09-04T12:55:59+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "6430059559752941",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR BP FOR CONTROL VALVES (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for BP Engineering for Control Valves (***) ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2013-12-01T00:00:00+00:00",
+                "scheduledEndTime": "2013-12-30T00:00:00+00:00",
+                "scheduledStartTime": "2013-12-01T07:00:00+00:00",
+                "sourceCreatedTime": "2013-09-04T12:57:42+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "8931995965379513",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "VENTIL ***-ESDV-*** *** HENGER, MÅ ***",
+                "description": "*** har *** og brukt lang tid på *** *** over lang tid. Bør *** byttes. *** etter en del *** men henger etter en *** uten operasjon.",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Fare for produksjonsstans (utføres innen *** dager)",
+                "endTime": "2014-01-20T09:13:09+00:00",
+                "startTime": "2014-01-19T00:00:00+00:00",
+                "scheduledEndTime": "2014-01-24T00:00:00+00:00",
+                "sourceCreatedTime": "2014-01-18T09:36:04+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "2193595977840496",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> VEDLIKEHOLD AV SEAL GASS KOMPRESSOR FOR ***-KA-*** (*** mon",
+                "description": "Vedlikehold av seal gass ***. for gass kompressor ***-KA-*** ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2014-01-27T02:10:53+00:00",
+                "startTime": "2014-01-26T00:00:00+00:00",
+                "scheduledEndTime": "2014-03-26T00:00:00+00:00",
+                "scheduledStartTime": "2014-01-26T07:00:00+00:00",
+                "sourceCreatedTime": "2013-11-14T10:52:28+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "1057810147001933",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "*** *** *** FOR *** TIL *** DOWN ***",
+                "description": "valhall *** for timer *** timer,*** arbeid *** ***,  etter *** fra *** *** ***",
+                "type": "MOD",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2015-05-20T15:19:29+00:00",
+                "startTime": "2010-06-13T07:00:00+00:00",
+                "scheduledStartTime": "2010-05-23T07:00:00+00:00",
+                "sourceCreatedTime": "2010-01-14T09:40:50+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "2030008419873183",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "VPH: SJEKK *** ***-PDT-***",
+                "description": "ser ikke ut som om den virker, *** kanskje *** eller ***, skal sjekkes",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2014-06-30T09:39:10+00:00",
+                "startTime": "2014-06-26T07:00:00+00:00",
+                "scheduledEndTime": "2014-12-22T00:00:00+00:00",
+                "sourceCreatedTime": "2014-02-20T13:24:48+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "5783402429316016",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR BP FOR ON-OFF VALVES (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for BP for on-off valves ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2014-03-21T08:25:41+00:00",
+                "startTime": "2014-03-01T00:00:00+00:00",
+                "scheduledEndTime": "2014-03-30T00:00:00+00:00",
+                "scheduledStartTime": "2014-03-01T07:00:00+00:00",
+                "sourceCreatedTime": "2014-01-31T11:48:34+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "6861100426193852",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR GE BN SYSTEM *** AND TRENDMASTER (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for GE for rotating equipment (BN System1 and TredmasterPro.) ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2014-03-28T12:02:55+00:00",
+                "startTime": "2014-03-01T00:00:00+00:00",
+                "scheduledEndTime": "2014-03-30T00:00:00+00:00",
+                "scheduledStartTime": "2014-03-01T07:00:00+00:00",
+                "sourceCreatedTime": "2014-01-31T13:19:55+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "7411546355287519",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR BP FOR ROTATING EQUIPMENT (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for BP for rotating equipment ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2014-03-01T00:00:00+00:00",
+                "scheduledEndTime": "2014-03-30T00:00:00+00:00",
+                "scheduledStartTime": "2014-03-01T07:00:00+00:00",
+                "sourceCreatedTime": "2014-01-31T11:48:33+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "5300454528126907",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR BP FOR ROTATING EQUIPMENT (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for BP for rotating equipment ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2014-03-01T00:00:00+00:00",
+                "scheduledEndTime": "2014-03-30T00:00:00+00:00",
+                "scheduledStartTime": "2014-03-01T07:00:00+00:00",
+                "sourceCreatedTime": "2013-11-11T14:12:10+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "347732886929407",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> VEDLIKEHOLD AV BLOW DOWN VENTILER (*** month)",
+                "description": "Vedlikehold av Blow Down ventiler ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2014-03-31T09:08:07+00:00",
+                "startTime": "2014-03-19T00:00:00+00:00",
+                "scheduledEndTime": "2014-05-17T00:00:00+00:00",
+                "scheduledStartTime": "2014-03-27T07:00:00+00:00",
+                "sourceCreatedTime": "2014-01-24T11:41:51+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "7120400989508216",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "***, *** OF *** ***",
+                "description": "***, *** OF *** *** ON *** *** - DP and *** DP - PCP",
+                "type": "MOD",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2011-03-26T00:00:00+00:00",
+                "sourceCreatedTime": "2011-02-04T10:44:47+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "5890247564946353",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> VEDLIKEHOLD AV PSD VENTILER *** (*** month)",
+                "description": "Vedlikehold av PSD ventiler *** ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2014-04-18T07:54:38+00:00",
+                "startTime": "2014-03-19T00:00:00+00:00",
+                "scheduledEndTime": "2014-05-17T00:00:00+00:00",
+                "scheduledStartTime": "2014-04-17T07:00:00+00:00",
+                "sourceCreatedTime": "2014-01-24T11:41:48+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "462729003831811",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR SCORE FOR ***-MAP (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for SCORE for Critical ESD Valves & Actuators (***-MAP) ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2014-05-01T00:00:00+00:00",
+                "scheduledEndTime": "2014-05-30T00:00:00+00:00",
+                "scheduledStartTime": "2014-05-01T07:00:00+00:00",
+                "sourceCreatedTime": "2014-01-27T13:33:46+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "6161476215099572",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR GE BN SYSTEM *** AND TRENDMASTER (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for GE for rotating equipment (BN System1 and TredmasterPro.) ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2014-05-01T00:00:00+00:00",
+                "scheduledEndTime": "2014-05-30T00:00:00+00:00",
+                "scheduledStartTime": "2014-05-01T07:00:00+00:00",
+                "sourceCreatedTime": "2014-01-27T13:27:03+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "2093835945509718",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR *** FOR CONTROL VALVES (***) (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for *** for Control Valves (***) ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2014-06-01T00:00:00+00:00",
+                "scheduledEndTime": "2014-06-30T00:00:00+00:00",
+                "scheduledStartTime": "2014-06-01T07:00:00+00:00",
+                "sourceCreatedTime": "2014-01-27T13:34:20+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "8878051485472775",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> SMØREOLJEPRØVE KOMPRESSORER  (*** month)",
+                "description": "Smøreoljeprøve kompressorer  ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2014-08-19T16:51:38+00:00",
+                "startTime": "2014-08-26T00:00:00+00:00",
+                "scheduledEndTime": "2014-09-24T00:00:00+00:00",
+                "scheduledStartTime": "2014-08-26T07:00:00+00:00",
+                "sourceCreatedTime": "2014-06-13T21:17:53+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "4887398732029466",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR *** FOR CONTROL VALVES (***) (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for *** for Control Valves (***) ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2014-09-01T00:00:00+00:00",
+                "scheduledEndTime": "2014-09-30T00:00:00+00:00",
+                "scheduledStartTime": "2014-09-01T07:00:00+00:00",
+                "sourceCreatedTime": "2014-06-13T21:40:59+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "3979437389911174",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "SD-***: ÅRLIG ETTERSYN INSTRUMENTERING KOMPRESSOR ***-KA-*** ",
+                "description": "Årlig ettersyn instrumentering kompressor ***-KA-*** ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2014-09-08T17:43:27+00:00",
+                "startTime": "2014-08-06T00:00:00+00:00",
+                "scheduledEndTime": "2014-10-04T00:00:00+00:00",
+                "scheduledStartTime": "2014-09-04T07:00:00+00:00",
+                "sourceCreatedTime": "2013-10-31T09:40:03+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "4577332412271841",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "***-INSTALLATION - WP *** - ***-UP TO *** ***  ***",
+                "description": "Installation - WP *** - ***-Up to *** ***  ***",
+                "type": "MOD",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2009-10-11T07:53:23+00:00",
+                "startTime": "2009-05-27T00:00:00+00:00",
+                "sourceCreatedTime": "2009-03-05T09:01:07+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "934866828453307",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "PCP, *** ***-***,  *** STK VENTILER MÅ ***",
+                "description": "***-***-***-***-***:  Ventiler *** *** av *** mellom *** *** og *** *** må ***.  Evt. sette inn *** in spool/ *** mellom *** *** og *** ***.  Slik ventilene står nå, så er det fare for ***.",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "scheduledEndTime": "2013-06-15T00:00:00+00:00",
+                "sourceCreatedTime": "2012-06-21T19:40:10+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "437226741260378",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR *** FOR CONTROL VALVES (***) (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for *** for Control Valves (***) ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2014-11-01T00:00:00+00:00",
+                "scheduledEndTime": "2014-11-30T00:00:00+00:00",
+                "scheduledStartTime": "2014-11-01T07:00:00+00:00",
+                "sourceCreatedTime": "2014-09-18T20:00:01+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "4819573718561035",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR GE BN SYSTEM *** AND TRENDMASTER (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CMP) for GE for rotating equipment (BN System1 and TredmasterPro.) ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2014-11-21T11:00:52+00:00",
+                "startTime": "2014-11-01T00:00:00+00:00",
+                "scheduledEndTime": "2014-11-30T00:00:00+00:00",
+                "scheduledStartTime": "2014-11-01T07:00:00+00:00",
+                "sourceCreatedTime": "2014-08-18T21:32:58+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "2691582656402510",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> INSPEKSJON AV PSV (*** month)",
+                "description": "Inspeksjon av PSV ",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2014-12-10T13:55:04+00:00",
+                "startTime": "2014-10-29T00:00:00+00:00",
+                "scheduledEndTime": "2015-01-26T00:00:00+00:00",
+                "scheduledStartTime": "2014-12-11T07:00:00+00:00",
+                "sourceCreatedTime": "2014-06-13T23:15:42+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "7355489087360619",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "PH.***.***.STG COMP. *** COOLING MED (MOTOR)",
+                "description": "***-FT-***: denne *** viste *** *** *** ***. Sjekket *** felt og der ser det ut som at noen *** *** på denne (ingen *** *** på dette)",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Fare for produksjonsstans (utføres innen *** dager)",
+                "endTime": "2014-12-18T11:12:19+00:00",
+                "startTime": "2014-12-17T00:00:00+00:00",
+                "scheduledEndTime": "2014-12-21T00:00:00+00:00",
+                "scheduledStartTime": "2014-12-18T07:00:00+00:00",
+                "sourceCreatedTime": "2014-12-15T13:44:40+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "7914926929119835",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> ETTERSYN AV *** (FLAME ***) (*** month)",
+                "description": "Ettersyn av *** (flame ***) Ettersyn av *** (flame ***)",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2012-07-09T20:59:10+00:00",
+                "startTime": "2012-07-01T00:00:00+00:00",
+                "scheduledEndTime": "2012-08-29T00:00:00+00:00",
+                "scheduledStartTime": "2012-07-05T07:00:00+00:00",
+                "sourceCreatedTime": "2012-05-29T15:09:04+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "5780753994471035",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "<PH> CMR FOR UNITECH FOR *** SYSTEM (*** month)",
+                "description": "ONSHORE JOB - Condition Monitoring Program (CPM) for Unitech, for ***- surveillanced equipment. ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2015-01-01T00:00:00+00:00",
+                "scheduledEndTime": "2015-01-30T00:00:00+00:00",
+                "scheduledStartTime": "2015-01-01T07:00:00+00:00",
+                "sourceCreatedTime": "2014-11-13T21:48:43+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "6702997670077375",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "IP.***. BYGGE *** FOR DRIFT TIL SD.",
+                "description": "Vi må bygge *** på *** trinns discharge cooler på PH ***. Dette må vi ha klar til stans. (*** morgen)",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "sourceCreatedTime": "2015-01-13T11:10:12+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "3379333610202442",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "***.***: SEAL GASS: SJEKKE FOR ***",
+                "description": "Sjekke ***. *** *** *** system for ***.Se vedlagt *** ***&ID, og ***.",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2015-01-20T16:53:42+00:00",
+                "startTime": "2015-01-17T00:00:00+00:00",
+                "scheduledEndTime": "2015-07-15T00:00:00+00:00",
+                "sourceCreatedTime": "2015-01-16T11:49:53+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "1195115919468152",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "*** INTERLOCK-SYSTEM TIL ***",
+                "description": "*** interlock system på ***. *** at ved bruk av *** skal det kun være mulig *** *** fra et *** om ***. Er dette noe *** kan *** ved neste ***",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2015-10-29T07:00:00+00:00",
+                "scheduledEndTime": "2016-04-25T00:00:00+00:00",
+                "sourceCreatedTime": "2015-01-19T14:12:18+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "3691171755385958",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "***, DETEKSJON AV GASSLEKKASJER (*** month)",
+                "description": "INSPEKSJON AV VALHALL FOR GASSLEKKASJER ",
+                "type": "MAI",
+                "status": "900",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "startTime": "2014-12-29T00:00:00+00:00",
+                "scheduledEndTime": "2015-01-27T00:00:00+00:00",
+                "scheduledStartTime": "2015-01-22T07:00:00+00:00",
+                "sourceCreatedTime": "2014-09-18T21:29:33+00:00"
+              }
+            }
+          }
+        },
+        {
+          "instanceType": "node",
+          "version": 1,
+          "space": "springfield_instances",
+          "externalId": "2611072008085547",
+          "createdTime": 1758799375273,
+          "lastUpdatedTime": 1758799375273,
+          "properties": {
+            "sp_enterprise_process_industry": {
+              "YourOrgMaintenanceOrder/v1": {
+                "assets": [],
+                "equipment": [],
+                "timeSeries": [],
+                "name": "PH HV *** *** ***",
+                "description": "PH HV *** *** ***.Det ble *** *** at alle *** *** fra PH HV *** *** alarm.",
+                "type": "MAI",
+                "status": "600",
+                "priorityDescription": "Ikke kritisk (utføres sammen med planlagt vedlikehold)",
+                "endTime": "2015-02-08T08:20:27+00:00",
+                "startTime": "2015-02-15T00:00:00+00:00",
+                "scheduledEndTime": "2015-05-05T00:00:00+00:00",
+                "scheduledStartTime": "2015-02-05T07:00:00+00:00",
+                "sourceCreatedTime": "2014-05-30T09:51:27+00:00"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "nextCursor": {
+      "n": "sekVWeMT0iXnNt0nUf1LObsc0QIASRxrH3pZh8fypR_lboI9DuPKWDFBvQj-Rp-zaxwgnuk4OTM1DAFU6DtK5r9xcrHfe6hTCuP7QvSTaZPHm2mK2tJDTVHtvllf34I7TINLo_LurJ4Xbv1lOJ2Wcgu2gbdeQxKicBJbozXNW_OKRDCUh8R7MK1GIUjP2gICaougtRcJr4Sl_mEP1vtkWhHBLSNNXZ7dEsO1htuFNUxSHRKKPAT8BldZ-Z9ns1KLHhNkRKNC9Wd_nYxd0tywNHxzSXemEwcevVfE9SdyYQOtd_3ZkGj7HxWRuN4m5-iKMsEMynjtRtvlII7Dp10_pWmUwXR6zG-nI0NMb0VrwvLXQqLznW8M6wMm4IvRMZoj83XNdPBSiw4hwwiH3wW2b4gGNGzxa01uCof0VgFQzfqKF8oz6rtomOPFanAzOyYWLIMSIyIDlnknOnZggv5pIPCOnslUDB6spR9cyTFEzPw-xQTDvHs8_Ytgkp4T0wSASPAXtNk2it9JTvWvo8C55w=="
+    }
+  } 

@@ -1,0 +1,54 @@
+{
+  "with": {
+    "n": {
+      "limit": 25,
+      "nodes": {
+        "filter": {
+          "range": {
+            "gt": "2025-12-02T00:01:00Z",
+            "property": [
+              "node",
+              "lastUpdatedTime"
+            ]
+          }
+        },
+        "chainTo": "destination",
+        "direction": "outwards"
+      }
+    }
+  },
+  "select": {
+    "n": {
+      "sources": [
+        {
+          "source": {
+            "type": "view",
+            "space": "cdf_cdm",
+            "version": "v1",
+            "externalId": "CogniteActivity"
+          },
+          "properties": [
+            "name",
+            "description",
+            "tags",
+            "aliases",
+            "sourceId",
+            "sourceContext",
+            "source",
+            "sourceCreatedTime",
+            "sourceUpdatedTime",
+            "sourceCreatedUser",
+            "sourceUpdatedUser",
+            "startTime",
+            "endTime",
+            "scheduledStartTime",
+            "scheduledEndTime",
+            "assets",
+            "equipment",
+            "timeSeries"
+          ]
+        }
+      ]
+    }
+  }
+}
