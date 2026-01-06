@@ -1,6 +1,0 @@
-# Ignore everything except deployment files
-*
-!.gitignore
-!handler.py
-!requirements.txt
-!*.whl

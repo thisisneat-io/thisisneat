@@ -1,5 +1,0 @@
-{
-  "view": "YourOrgOperation",
-  "space": "sp_enterprise_process_industry",
-  "instances": "${workflow.input}"
-}
