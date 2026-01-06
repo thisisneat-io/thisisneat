@@ -39,6 +39,7 @@ from ._state import SessionState
 from ._subset import SubsetAPI
 from ._template import TemplateAPI
 from ._to import ToAPI
+from ._validate_instances import ValidateInstancesAPI
 from .engine import load_neat_engine
 from .exceptions import session_class_wrapper
 from .v1 import ConceptualDataModelAPI, InstancesAPI
@@ -119,6 +120,7 @@ class NeatSession:
         # new API for data model operations
         self.conceptual_data_model = ConceptualDataModelAPI(self._state)
         self.instances = InstancesAPI(self._state)
+        self.validate_instances = ValidateInstancesAPI(self._state)
 
     def _select_most_performant_store(self) -> Literal["memory", "oxigraph"]:
         """Select the most performant store based on the current environment."""
@@ -293,6 +295,20 @@ class NeatSession:
 
         if not state.instances.empty:
             output.append(f"<H2>Instances</H2> {state.instances.store._repr_html_()}")
+            
+            # Add cursor information if available
+            cursors = state.instances.get_cursors()
+            if cursors:
+                cursor_html = "<H3>DMS Sync Cursors:</H3>"
+                cursor_html += "<ul style='margin-top: 5px;'>"
+                for view_key in sorted(cursors.keys()):
+                    # Extract view name from key (format: "space:external_id:version:type")
+                    parts = view_key.rsplit(":", 1)
+                    view_name = parts[0] if len(parts) > 1 else view_key
+                    cursor_html += f"<li><code>{view_name}</code></li>"
+                cursor_html += "</ul>"
+                cursor_html += f"<p style='margin-top: 5px;'><em>Total: {len(cursors)} view cursor(s) stored</em></p>"
+                output.append(cursor_html)
 
         return "<br />".join(output)
 
