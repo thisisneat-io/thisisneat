@@ -40,7 +40,7 @@ def _safe_register_custom_function(uri: URIRef, func: Callable) -> bool:
     Safely register a custom SPARQL function, handling already-registered cases.
 
     rdflib's register_custom_function raises ValueError if already registered.
-    This wrapper catches that error and optionally replaces the function.
+    This wrapper catches that error gracefully.
 
     Args:
         uri: The function URI
@@ -49,24 +49,14 @@ def _safe_register_custom_function(uri: URIRef, func: Callable) -> bool:
     Returns:
         True if registered successfully, False if already registered
     """
-    from rdflib.plugins.sparql import CUSTOM_EVALS
+    from rdflib.plugins.sparql.operators import register_custom_function
 
-    # Check if already registered and replace if so
-    uri_str = str(uri)
-    if uri_str in CUSTOM_EVALS:
-        CUSTOM_EVALS[uri_str] = func
-        return True
-
-    # Try to register normally
     try:
-        from rdflib.plugins.sparql.operators import register_custom_function
-
         register_custom_function(uri, func)
         return True
     except ValueError:
-        # Already registered by another call, just update
-        CUSTOM_EVALS[uri_str] = func
-        return True
+        # Already registered - that's fine, the existing registration works
+        return False
 
 
 def register_cdf_sparql_functions(
