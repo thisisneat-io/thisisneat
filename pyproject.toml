@@ -115,7 +115,12 @@ package = true
 # See https://docs.astral.sh/ruff/rules/ for an overview of ruff rules
 select = ["E", "W", "F", "I", "RUF", "TID", "UP", "B", "FLY", "PTH", "ERA"]
 fixable = ["E", "W", "F", "I", "RUF", "TID", "UP", "B", "FLY", "PTH", "ERA"]
-ignore = []
+ignore = [
+    "RUF005",  # list concatenation style
+    "RUF012",  # mutable class attributes
+    "RUF059",  # unpacked variable never used
+    "ERA001",  # commented-out code
+]
 
 [tool.ruff.lint.isort]
 known-third-party = ["cognite.client"]
