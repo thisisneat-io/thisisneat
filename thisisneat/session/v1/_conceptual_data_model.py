@@ -381,7 +381,7 @@ class WriteAPI:
             "SHACL Export",
             has_conceptual_data_model=True,
             multi_value_type_properties_allowed=False,
-            unknown_value_type_properties_allowed=True,
+            unknown_value_type_properties_allowed=False,
         )
         exporter = exporters.SHACLExporter()
 

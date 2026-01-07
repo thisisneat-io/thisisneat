@@ -21,6 +21,37 @@ class InstancesAPI:
         self.read = ReadAPI(state)
         self.validate = ValidateAPI(state)
 
+    def get_cursors(self) -> dict[str, str]:
+        """Get the current DMS sync cursors.
+        
+        Returns:
+            dict[str, str]: Dictionary mapping view identifiers to cursor strings.
+                Keys are in format: "space:external_id:version:cursor_type"
+        
+        Example:
+            ```python
+            cursors = neat.instances.get_cursors()
+            print(f"Stored {len(cursors)} cursors")
+            ```
+        """
+        return self._state.instances.get_cursors()
+
+    def set_cursors(self, cursors: dict[str, str]) -> None:
+        """Set the DMS sync cursors for incremental updates.
+        
+        Args:
+            cursors: Dictionary mapping view identifiers to cursor strings.
+        
+        Example:
+            ```python
+            import json
+            with open('cursors.json', 'r') as f:
+                cursors = json.load(f)
+            neat.instances.set_cursors(cursors)
+            ```
+        """
+        self._state.instances.set_cursors(cursors)
+
 
 @session_class_wrapper
 class ReadAPI:
@@ -121,12 +152,9 @@ class ValidateAPI:
         """
 
         import pyshacl
-        from thisisneat.core._constants import NEAT
 
         try:
-            validation_graph = self._state.instances.store.graph(NEAT.ValidationGraph)
-            validation_graph.remove((None, None, None))
-            validation_graph.parse(data=io)
+            self._state.instances.store.graph(NEAT.ValidationGraph).parse(data=io)
 
         except Exception:
             self._state.instances.store.graph(NEAT.ValidationGraph).parse(io)
@@ -134,6 +162,8 @@ class ValidateAPI:
         conforms, report_graph, report_text = pyshacl.validate(
             data_graph=self._state.instances.store.graph(),
             shacl_graph=self._state.instances.store.graph(NEAT.ValidationGraph),
+            inference="none",  # RDFS inference to match class hierarchies
+            debug=False,
             serialize_report_graph="ttl",
         )
         return conforms, report_graph.decode("utf-8"), report_text
