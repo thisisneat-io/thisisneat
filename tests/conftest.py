@@ -4,6 +4,24 @@ import pandas as pd
 import pytest
 
 from tests.config import DOC_RULES
+
+
+@pytest.fixture(autouse=True)
+def cleanup_cdf_sparql_functions():
+    """
+    Cleanup CDF SPARQL functions after each test to prevent pollution.
+
+    The CDF SPARQL functions are registered globally in rdflib's CUSTOM_EVALS,
+    which can interfere with unrelated tests that use SPARQL queries.
+    """
+    yield
+    # Cleanup after test
+    try:
+        from thisisneat.core._cdf_sparql_functions import unregister_cdf_sparql_functions
+
+        unregister_cdf_sparql_functions()
+    except ImportError:
+        pass  # Module not available, nothing to cleanup
 from tests.data import SchemaData
 from thisisneat.core._client.data_classes.schema import DMSSchema
 from thisisneat.core._data_model.importers import ExcelImporter
