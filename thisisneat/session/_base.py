@@ -295,7 +295,7 @@ class NeatSession:
 
         if not state.instances.empty:
             output.append(f"<H2>Instances</H2> {state.instances.store._repr_html_()}")
-            
+
             # Add cursor information if available
             cursors = state.instances.get_cursors()
             if cursors:

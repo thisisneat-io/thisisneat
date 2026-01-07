@@ -13,10 +13,12 @@ Functions available:
 Reference:
 - Cognite SDK Datapoints API: https://cognite-sdk-python.readthedocs-hosted.com/en/latest/time_series.html
 """
+
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from rdflib import Literal
 
@@ -24,12 +26,11 @@ from ._helpers import literal_to_python, parse_instance_id_from_uri, safe_sparql
 
 if TYPE_CHECKING:
     from cognite.client import CogniteClient
-    from cognite.client.data_classes.data_modeling import NodeId
 
 logger = logging.getLogger(__name__)
 
 
-def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
+def create_sdk_wrappers(client: CogniteClient) -> dict[str, Callable]:
     """
     Create CDF SDK wrapper functions for SPARQL registration.
 
@@ -355,4 +356,3 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
     wrappers["datapoints_max"] = datapoints_max
 
     return wrappers
-

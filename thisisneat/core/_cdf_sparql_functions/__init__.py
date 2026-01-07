@@ -63,6 +63,7 @@ cdf_indsl: (requires INDSL: pip install indsl)
     - low_density(uri, cutoff) - Identify low density periods
     - out_of_range(uri) - Detect out of range values
 """
+
 from ._helpers import (
     create_datapoints_fetcher,
     get_timeseries_datapoints,
@@ -86,25 +87,19 @@ from ._registry import (
 from ._sdk_wrappers import create_sdk_wrappers
 
 __all__ = [
-    # Main registration function
-    "register_cdf_sparql_functions",
-    "unregister_cdf_sparql_functions",
-    "get_registered_functions",
-    # Namespace constants
-    "CDF_SDK_NS",
     "CDF_INDSL_NS",
-    # Wrapper factories
-    "create_sdk_wrappers",
-    "create_indsl_wrappers",
-    # INDSL availability
-    "is_indsl_available",
-    "get_indsl_import_error",
-    # Helpers
-    "parse_instance_id_from_uri",
-    "get_timeseries_datapoints",
-    "verify_timeseries_exists",
+    "CDF_SDK_NS",
     "create_datapoints_fetcher",
+    "create_indsl_wrappers",
+    "create_sdk_wrappers",
+    "get_indsl_import_error",
+    "get_registered_functions",
+    "get_timeseries_datapoints",
+    "is_indsl_available",
     "literal_to_python",
+    "parse_instance_id_from_uri",
+    "register_cdf_sparql_functions",
     "safe_sparql_wrapper",
+    "unregister_cdf_sparql_functions",
+    "verify_timeseries_exists",
 ]
-

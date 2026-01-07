@@ -43,9 +43,7 @@ class TestSHACLValidation:
         return cognite_client.data_modeling.containers.apply(container)
 
     @pytest.fixture
-    def test_view(
-        self, cognite_client: CogniteClient, test_space: dm.Space, test_container: dm.Container
-    ) -> dm.View:
+    def test_view(self, cognite_client: CogniteClient, test_space: dm.Space, test_container: dm.Container) -> dm.View:
         """Create a test view for validation tests."""
         container_id = test_container.as_id()
         view = dm.ViewApply(
@@ -53,15 +51,11 @@ class TestSHACLValidation:
             external_id="TestAssetView",
             version="v1",
             properties={
-                "name": dm.MappedPropertyApply(
-                    container=container_id, container_property_identifier="name"
-                ),
+                "name": dm.MappedPropertyApply(container=container_id, container_property_identifier="name"),
                 "description": dm.MappedPropertyApply(
                     container=container_id, container_property_identifier="description"
                 ),
-                "value": dm.MappedPropertyApply(
-                    container=container_id, container_property_identifier="value"
-                ),
+                "value": dm.MappedPropertyApply(container=container_id, container_property_identifier="value"),
             },
         )
         # Clean up any existing view first
@@ -110,7 +104,7 @@ class TestSHACLValidation:
                 ] .
         """
 
-        conforms, report_graph, report_text = neat.validate_instances.with_shacl(
+        conforms, _report_graph, report_text = neat.validate_instances.with_shacl(
             instances=instances,
             shacl_rules=shacl_rules,
             datamodel_space=test_space.space,
@@ -161,7 +155,7 @@ class TestSHACLValidation:
                 ] .
         """
 
-        conforms, report_graph, report_text = neat.validate_instances.with_shacl(
+        conforms, _report_graph, report_text = neat.validate_instances.with_shacl(
             instances=instances,
             shacl_rules=shacl_rules,
             datamodel_space=test_space.space,
@@ -213,7 +207,7 @@ class TestSHACLValidation:
                 ] .
         """
 
-        conforms, report_graph, report_text = neat.validate_instances.with_shacl(
+        conforms, _report_graph, report_text = neat.validate_instances.with_shacl(
             instances=instances,
             shacl_rules=shacl_rules,
             datamodel_space=test_space.space,
@@ -273,7 +267,7 @@ class TestSHACLValidation:
                 ] .
         """
 
-        conforms, report_graph, report_text = neat.validate_instances.with_shacl(
+        conforms, _report_graph, report_text = neat.validate_instances.with_shacl(
             instances=instances,
             shacl_rules=shacl_rules,
             datamodel_space=test_space.space,
@@ -322,7 +316,7 @@ class TestSHACLValidation:
         """
 
         # This should complete without errors (no references to load)
-        conforms, report_graph, report_text = neat.validate_instances.with_shacl(
+        conforms, _report_graph, report_text = neat.validate_instances.with_shacl(
             instances=instances,
             shacl_rules=shacl_rules,
             datamodel_space=test_space.space,

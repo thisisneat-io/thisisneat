@@ -157,7 +157,7 @@ class DMSGraphExtractor(KnowledgeGraphExtractor):
         yield from extractor.extract()
         # Cursors are now available after generator is consumed
         self._result_cursors = extractor.get_cursors()
-    
+
     def get_cursors(self) -> dict[str, str]:
         """Returns the cursors from the last extraction for incremental sync."""
         return self._result_cursors

@@ -1,6 +1,6 @@
 """Tests for CDF SDK wrapper functions."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from rdflib import Literal
@@ -47,13 +47,12 @@ class TestDatapointsAggregateWrapper:
 
     def test_aggregate_returns_count(self, mock_client):
         """Test that aggregate returns count value."""
-        # Mock datapoint with count attribute
+        # Mock datapoint with count attribute - retrieve returns iterable of datapoints
         mock_datapoint = MagicMock()
         mock_datapoint.count = 42
 
-        mock_result = MagicMock()
-        mock_result.datapoints = [mock_datapoint]
-        mock_client.time_series.data.aggregate.return_value = [mock_result]
+        # retrieve() with aggregates returns an iterable of datapoints
+        mock_client.time_series.data.retrieve.return_value = [mock_datapoint]
 
         wrappers = create_sdk_wrappers(mock_client)
         result = wrappers["datapoints_aggregate"](
@@ -68,7 +67,7 @@ class TestDatapointsAggregateWrapper:
 
     def test_aggregate_with_multiple_buckets(self, mock_client):
         """Test that aggregate sums values across multiple granularity buckets."""
-        # Mock multiple datapoints
+        # Mock multiple datapoints - retrieve() returns iterable of datapoints
         mock_dp1 = MagicMock()
         mock_dp1.count = 10
         mock_dp2 = MagicMock()
@@ -76,9 +75,8 @@ class TestDatapointsAggregateWrapper:
         mock_dp3 = MagicMock()
         mock_dp3.count = 20
 
-        mock_result = MagicMock()
-        mock_result.datapoints = [mock_dp1, mock_dp2, mock_dp3]
-        mock_client.time_series.data.aggregate.return_value = [mock_result]
+        # retrieve() with aggregates returns an iterable of datapoint objects
+        mock_client.time_series.data.retrieve.return_value = [mock_dp1, mock_dp2, mock_dp3]
 
         wrappers = create_sdk_wrappers(mock_client)
         result = wrappers["datapoints_aggregate"](
@@ -91,7 +89,7 @@ class TestDatapointsAggregateWrapper:
 
     def test_aggregate_returns_zero_on_empty_result(self, mock_client):
         """Test that aggregate returns 0 when no data found."""
-        mock_client.time_series.data.aggregate.return_value = []
+        mock_client.time_series.data.retrieve.return_value = []
 
         wrappers = create_sdk_wrappers(mock_client)
         result = wrappers["datapoints_aggregate"](
@@ -104,7 +102,7 @@ class TestDatapointsAggregateWrapper:
 
     def test_aggregate_handles_exception(self, mock_client):
         """Test that aggregate returns 0 on exception."""
-        mock_client.time_series.data.aggregate.side_effect = Exception("API error")
+        mock_client.time_series.data.retrieve.side_effect = Exception("API error")
 
         wrappers = create_sdk_wrappers(mock_client)
         result = wrappers["datapoints_aggregate"](
@@ -127,9 +125,14 @@ class TestDatapointsCountWrapper:
 
     def test_count_returns_datapoint_count(self, mock_client):
         """Test that count returns number of datapoints."""
-        mock_result = MagicMock()
-        mock_result.__len__ = MagicMock(return_value=100)
-        mock_client.time_series.data.retrieve.return_value = [mock_result]
+        # retrieve() with aggregates=["count"] returns iterable of datapoints
+        # each datapoint has a .count attribute with the count for that bucket
+        mock_dp1 = MagicMock()
+        mock_dp1.count = 50
+        mock_dp2 = MagicMock()
+        mock_dp2.count = 50
+
+        mock_client.time_series.data.retrieve.return_value = [mock_dp1, mock_dp2]
 
         wrappers = create_sdk_wrappers(mock_client)
         result = wrappers["datapoints_count"](
@@ -138,7 +141,7 @@ class TestDatapointsCountWrapper:
             "now",
         )
 
-        assert result == Literal(100)
+        assert result == Literal(100)  # 50 + 50
 
     def test_count_returns_zero_on_empty(self, mock_client):
         """Test that count returns 0 when no data found."""

@@ -6,12 +6,14 @@ Provides helpers for:
 - Fetching time series datapoints
 - Caching and error handling
 """
+
 from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Callable
 from functools import lru_cache, wraps
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 from rdflib import Literal, URIRef
@@ -38,7 +40,7 @@ URI_PATTERNS = [
 ]
 
 
-def parse_instance_id_from_uri(uri: URIRef | str) -> "NodeId":
+def parse_instance_id_from_uri(uri: URIRef | str) -> NodeId:
     """
     Parse instance_id (space + external_id) from a time series URI.
 
@@ -90,8 +92,8 @@ def parse_instance_id_from_uri(uri: URIRef | str) -> "NodeId":
 
 
 def verify_timeseries_exists(
-    client: "CogniteClient",
-    instance_id: "NodeId",
+    client: CogniteClient,
+    instance_id: NodeId,
 ) -> bool:
     """
     Verify that an instance_id corresponds to a valid time series in CDF.
@@ -121,8 +123,8 @@ def verify_timeseries_exists(
 
 
 def get_timeseries_datapoints(
-    client: "CogniteClient",
-    instance_id: "NodeId",
+    client: CogniteClient,
+    instance_id: NodeId,
     start: str = "30d-ago",
     end: str = "now",
     limit: int | None = None,
@@ -215,7 +217,7 @@ def safe_sparql_wrapper(default_value: Any = None) -> Callable:
     return decorator
 
 
-def create_datapoints_fetcher(client: "CogniteClient") -> Callable[["NodeId"], pd.Series]:
+def create_datapoints_fetcher(client: CogniteClient) -> Callable[[NodeId], pd.Series]:
     """
     Create a cached datapoints fetcher function.
 
@@ -228,6 +230,7 @@ def create_datapoints_fetcher(client: "CogniteClient") -> Callable[["NodeId"], p
     Returns:
         Callable that takes NodeId and returns pandas Series
     """
+
     # Use a cache with reasonable size for validation runs
     @lru_cache(maxsize=100)
     def _cached_fetch(space: str, external_id: str) -> pd.Series:
@@ -235,11 +238,9 @@ def create_datapoints_fetcher(client: "CogniteClient") -> Callable[["NodeId"], p
 
         instance_id = NodeId(space=space, external_id=external_id)
         # Use 7 days and limit to 10000 datapoints for reasonable performance
-        return get_timeseries_datapoints(
-            client, instance_id, start="7d-ago", end="now", limit=10000
-        )
+        return get_timeseries_datapoints(client, instance_id, start="7d-ago", end="now", limit=10000)
 
-    def fetch(instance_id: "NodeId") -> pd.Series:
+    def fetch(instance_id: NodeId) -> pd.Series:
         return _cached_fetch(instance_id.space, instance_id.external_id)
 
     # Clear cache method for testing
@@ -266,4 +267,3 @@ def literal_to_python(value: Any) -> Any:
     if isinstance(value, URIRef):
         return str(value)
     return value
-

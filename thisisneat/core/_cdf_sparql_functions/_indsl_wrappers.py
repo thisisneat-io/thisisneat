@@ -17,10 +17,12 @@ Reference:
 - INDSL Documentation: https://indsl.docs.cognite.com/
 - Data Quality Examples: https://indsl.docs.cognite.com/auto_examples/data_quality/index.html
 """
+
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import pandas as pd
 from rdflib import Literal
@@ -34,7 +36,6 @@ from ._helpers import (
 
 if TYPE_CHECKING:
     from cognite.client import CogniteClient
-    from cognite.client.data_classes.data_modeling import NodeId
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ def get_indsl_import_error() -> str | None:
     return _INDSL_IMPORT_ERROR
 
 
-def create_indsl_wrappers(client: "CogniteClient") -> dict[str, Callable]:
+def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
     """
     Create INDSL wrapper functions for SPARQL registration.
 
@@ -405,4 +406,3 @@ def create_indsl_wrappers(client: "CogniteClient") -> dict[str, Callable]:
         logger.debug("out_of_range_iqr not available in this INDSL version")
 
     return wrappers
-

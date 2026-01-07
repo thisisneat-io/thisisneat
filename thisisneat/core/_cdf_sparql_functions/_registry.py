@@ -13,10 +13,12 @@ Usage:
     # Then run pyshacl
     pyshacl.validate(...)
 """
+
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from rdflib import Graph, Namespace, URIRef
 
@@ -68,7 +70,7 @@ def _safe_register_custom_function(uri: URIRef, func: Callable) -> bool:
 
 
 def register_cdf_sparql_functions(
-    client: "CogniteClient",
+    client: CogniteClient,
     graph: Graph | None = None,
     force: bool = False,
 ) -> dict[str, list[str]]:
@@ -131,16 +133,12 @@ def register_cdf_sparql_functions(
         logger.debug(f"Registered SPARQL function: cdf_indsl:{name}")
 
     if not indsl_wrappers:
-        logger.info(
-            "INDSL functions not registered (INDSL not installed). "
-            "Install with: pip install indsl"
-        )
+        logger.info("INDSL functions not registered (INDSL not installed). Install with: pip install indsl")
 
     _REGISTERED = True
 
     logger.info(
-        f"Registered CDF SPARQL functions: "
-        f"{len(registered['cdf_sdk'])} SDK, {len(registered['cdf_indsl'])} INDSL"
+        f"Registered CDF SPARQL functions: {len(registered['cdf_sdk'])} SDK, {len(registered['cdf_indsl'])} INDSL"
     )
 
     return registered
@@ -235,4 +233,3 @@ def get_registered_functions() -> dict[str, list[str]]:
         "cdf_sdk": sdk_functions,
         "cdf_indsl": indsl_functions,
     }
-

@@ -140,17 +140,17 @@ class DMSExtractor(BaseExtractor):
         use_progress_bar = (
             GLOBAL_CONFIG.use_iterate_bar_threshold and total_instances > GLOBAL_CONFIG.use_iterate_bar_threshold
         )
-        
+
         # Check if this is an incremental sync (any view has None count)
         is_incremental_sync = any(total is None for total, _ in self.total_instances_pair_by_view.values())
 
         for view_id, (total, instances) in self.total_instances_pair_by_view.items():
             if total == 0:
                 continue
-            
+
             # Keep reference to original iterator before wrapping
             original_iterator = instances
-            
+
             if use_progress_bar and total is not None:
                 instances = iterate_progress_bar(
                     instances,
@@ -159,7 +159,9 @@ class DMSExtractor(BaseExtractor):
                 )
             elif is_incremental_sync and total is None:
                 # For incremental sync without progress bar, print a simple message
-                print(f"Syncing changes from {view_id.space}:{view_id.external_id}(version={view_id.version})...", end="")
+                print(
+                    f"Syncing changes from {view_id.space}:{view_id.external_id}(version={view_id.version})...", end=""
+                )
 
             instance_count = 0
             for count, item in enumerate(instances, 1):
@@ -167,20 +169,20 @@ class DMSExtractor(BaseExtractor):
                     break
                 instance_count += 1
                 yield from self._extract_instance(item)
-            
+
             # Print count for incremental sync
             if is_incremental_sync and total is None:
                 if instance_count > 0:
                     print(f" {instance_count} change(s)")
                 else:
                     print(" no changes")
-            
+
             # Collect cursors after iterating through this view
             # Use original iterator reference to get cursors
             if isinstance(original_iterator, _ViewInstanceIterator):
                 cursors = original_iterator.get_cursors()
                 self._result_cursors.update(cursors)
-    
+
     def get_cursors(self) -> dict[str, str]:
         """Returns the cursors from the last extraction for incremental sync."""
         return self._result_cursors
@@ -273,9 +275,9 @@ class DMSExtractor(BaseExtractor):
 
 class _ViewInstanceIterator(Iterable[Instance]):
     def __init__(
-        self, 
-        client: NeatClient, 
-        view: dm.View, 
+        self,
+        client: NeatClient,
+        view: dm.View,
         instance_space: str | SequenceNotStr[str] | None = None,
         cursors: dict[str, str] | None = None,
     ):
@@ -290,7 +292,7 @@ class _ViewInstanceIterator(Iterable[Instance]):
         # For incremental sync, we don't know the count upfront, so return None to disable progress bar
         if self.cursors:
             return None
-        
+
         node_count = edge_count = 0
         if self.view.used_for in ("node", "all"):
             node_result = self.client.data_modeling.instances.aggregate(
@@ -320,25 +322,31 @@ class _ViewInstanceIterator(Iterable[Instance]):
             if isinstance(prop, dm.MappedProperty)
             and is_readonly_property(prop.container, prop.container_property_identifier)
         }
-        
+
         # If cursors provided, use sync endpoint for incremental updates
         if self.cursors:
             yield from self._sync_instances(view_id, read_only_properties)
         else:
             # No cursors - use list endpoint for full load
             yield from self._list_instances(view_id, read_only_properties)
-    
+
     def _sync_instances(self, view_id: dm.ViewId, read_only_properties: Set[str]) -> Iterator[Instance]:
         """Use sync endpoint with cursors for incremental updates"""
-        from cognite.client.data_classes.data_modeling.query import Query, Select, SourceSelector
-        from cognite.client.data_classes.data_modeling.query import NodeResultSetExpression, EdgeResultSetExpression
-        from cognite.client.data_classes.filters import HasData, Equals
-        from cognite.client.exceptions import CogniteAPIError
         import time
-        
+
+        from cognite.client.data_classes.data_modeling.query import (
+            EdgeResultSetExpression,
+            NodeResultSetExpression,
+            Query,
+            Select,
+            SourceSelector,
+        )
+        from cognite.client.data_classes.filters import Equals, HasData
+        from cognite.client.exceptions import CogniteAPIError
+
         view_properties = list(self.view.properties.keys())
         view_key = f"{view_id.space}:{view_id.external_id}:{view_id.version}"
-        
+
         # Extract cursors for this specific view from the global cursors dict
         view_cursors = {}
         if self.cursors:
@@ -348,13 +356,15 @@ class _ViewInstanceIterator(Iterable[Instance]):
                     # Extract the cursor type (nodes/edges) from the key
                     cursor_type = key.split(":")[-1]
                     view_cursors[cursor_type] = value
-        
+
         # Build query based on view type
         if self.view.used_for == "edge":
             query = Query(
-                with_={"edges": EdgeResultSetExpression(
-                    filter=Equals(["edge", "type"], {"space": view_id.space, "externalId": view_id.external_id})
-                )},
+                with_={
+                    "edges": EdgeResultSetExpression(
+                        filter=Equals(["edge", "type"], {"space": view_id.space, "externalId": view_id.external_id})
+                    )
+                },
                 select={"edges": Select([SourceSelector(source=view_id, properties=view_properties)])},
                 cursors=view_cursors if view_cursors else None,
             )
@@ -366,9 +376,9 @@ class _ViewInstanceIterator(Iterable[Instance]):
                 cursors=view_cursors if view_cursors else None,
             )
             instance_key = "nodes"
-        
+
         query_start_time = int(time.time() * 1000)
-        
+
         try:
             res = self.client.data_modeling.instances.sync(query=query)
         except CogniteAPIError as e:
@@ -379,7 +389,7 @@ class _ViewInstanceIterator(Iterable[Instance]):
                 return
             else:
                 raise
-        
+
         # Yield instances from sync
         while True:
             if instance_key in res.data:
@@ -388,42 +398,47 @@ class _ViewInstanceIterator(Iterable[Instance]):
                         yield from self._remove_read_only_properties([instance], read_only_properties, view_id)
                     else:
                         yield instance
-            
+
             # Check if we should continue
             if not (instance_key in res.data and len(res.data[instance_key]) > 0):
                 break
-            
+
             # Short-circuit if recent updates found
             if self._has_recent_update(res, query_start_time, instance_key):
                 break
-            
+
             # Continue with next page
             query.cursors = res.cursors
             res = self.client.data_modeling.instances.sync(query=query)
-        
+
         # Store cursors with view-specific keys
         if res.cursors:
-            if hasattr(res.cursors, '__dict__'):
+            if hasattr(res.cursors, "__dict__"):
                 raw_cursors = dict(res.cursors.__dict__)
             elif isinstance(res.cursors, dict):
                 raw_cursors = res.cursors
             else:
                 raw_cursors = {}
-            
+
             # Namespace cursors by view
             for cursor_type, cursor_value in raw_cursors.items():
                 namespaced_key = f"{view_key}:{cursor_type}"
                 self._result_cursors[namespaced_key] = cursor_value
-    
+
     def _list_instances(self, view_id: dm.ViewId, read_only_properties: Set[str]) -> Iterator[Instance]:
         """Use list endpoint for full load (original logic)"""
-        from cognite.client.data_classes.data_modeling.query import Query, Select, SourceSelector
-        from cognite.client.data_classes.data_modeling.query import NodeResultSetExpression, EdgeResultSetExpression
-        from cognite.client.data_classes.filters import Not, MatchAll
-        
+        from cognite.client.data_classes.data_modeling.query import (
+            EdgeResultSetExpression,
+            NodeResultSetExpression,
+            Query,
+            Select,
+            SourceSelector,
+        )
+        from cognite.client.data_classes.filters import MatchAll, Not
+
         view_properties = list(self.view.properties.keys())
         view_key = f"{view_id.space}:{view_id.external_id}:{view_id.version}"
-        
+
         # FIRST: Run sync with empty filter to get current cursor (timestamp)
         # This ensures we don't miss any updates that happen during the list operation
         if self.view.used_for == "edge":
@@ -436,21 +451,21 @@ class _ViewInstanceIterator(Iterable[Instance]):
                 with_={"nodes": NodeResultSetExpression(filter=Not(MatchAll()))},
                 select={"nodes": Select([SourceSelector(source=view_id, properties=view_properties)])},
             )
-        
+
         res = self.client.data_modeling.instances.sync(query=query)
         # Convert cursors to dict if needed
-        if hasattr(res.cursors, '__dict__'):
+        if hasattr(res.cursors, "__dict__"):
             raw_cursors = dict(res.cursors.__dict__)
         elif isinstance(res.cursors, dict):
             raw_cursors = res.cursors
         else:
             raw_cursors = {}
-        
+
         # Namespace cursors by view
         for cursor_type, cursor_value in raw_cursors.items():
             namespaced_key = f"{view_key}:{cursor_type}"
             self._result_cursors[namespaced_key] = cursor_value
-        
+
         # THEN: Run list to get all instances
         # Any updates during this list will be caught in next sync using the cursor we just got
         if self.view.used_for in ("node", "all"):
@@ -482,7 +497,7 @@ class _ViewInstanceIterator(Iterable[Instance]):
                     ),
                     space=self.instance_space,
                 )
-    
+
     def _has_recent_update(self, result, query_start_time: int, instance_key: str) -> bool:
         """Check if any instance has lastUpdatedTime >= query_start_time"""
         if instance_key in result.data:
@@ -490,7 +505,7 @@ class _ViewInstanceIterator(Iterable[Instance]):
                 if instance.last_updated_time >= query_start_time:
                     return True
         return False
-    
+
     def get_cursors(self) -> dict[str, str]:
         """Returns the cursors from the last iteration"""
         return self._result_cursors

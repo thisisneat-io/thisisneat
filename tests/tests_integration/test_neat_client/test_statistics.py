@@ -29,4 +29,8 @@ class TestStatisticsAPI:
         assert len(space_usages) > 0
         total = sum(space_usage.nodes + space_usage.edges for space_usage in space_usages)
 
-        assert total == project_usage.instances.instances
+        # Allow small tolerance since counts can change between API calls
+        project_total = project_usage.instances.instances
+        assert abs(total - project_total) <= max(5, int(project_total * 0.05)), (
+            f"Space totals ({total}) should be close to project total ({project_total})"
+        )

@@ -8,9 +8,11 @@ These tests verify:
 Test time series are created using cdf_cdm/CogniteTimeSeries/v1 type
 with specific data patterns to test pass/fail scenarios.
 """
+
+# ruff: noqa: E501
 import datetime
 import time
-from typing import Generator
+from collections.abc import Generator
 
 import numpy as np
 import pytest
@@ -20,7 +22,6 @@ from cognite.client.data_classes.data_modeling import NodeId
 
 from thisisneat import NeatSession
 from thisisneat.core._client import NeatClient
-
 
 # Test space - persists between tests
 TEST_SPACE = "neat_timeseries_shacl_testing"
@@ -91,7 +92,7 @@ class TestCDFSparqlFunctions:
         values = 100 + np.random.normal(0, 2, len(timestamps))  # Mean 100, stddev 2
 
         # Insert datapoints using instance_id
-        datapoints = [(t, v) for t, v in zip(timestamps, values)]
+        datapoints = list(zip(timestamps, values, strict=True))
         cognite_client.time_series.data.insert(datapoints, instance_id=instance_id)
 
         # Wait for data to be available
@@ -101,9 +102,7 @@ class TestCDFSparqlFunctions:
 
         # Cleanup - delete DMS instance (time series data will be orphaned but that's ok for tests)
         try:
-            cognite_client.data_modeling.instances.delete(
-                nodes=[(test_space.space, ts_external_id)]
-            )
+            cognite_client.data_modeling.instances.delete(nodes=[(test_space.space, ts_external_id)])
         except Exception:
             pass
 
@@ -171,7 +170,7 @@ class TestCDFSparqlFunctions:
         values.reverse()
 
         # Insert datapoints using instance_id
-        datapoints = [(t, v) for t, v in zip(timestamps, values)]
+        datapoints = list(zip(timestamps, values, strict=True))
         cognite_client.time_series.data.insert(datapoints, instance_id=instance_id)
 
         # Wait for data to be available
@@ -181,9 +180,7 @@ class TestCDFSparqlFunctions:
 
         # Cleanup
         try:
-            cognite_client.data_modeling.instances.delete(
-                nodes=[(test_space.space, ts_external_id)]
-            )
+            cognite_client.data_modeling.instances.delete(nodes=[(test_space.space, ts_external_id)])
         except Exception:
             pass
 
@@ -217,15 +214,11 @@ class TestCDFSparqlFunctions:
 
         # Cleanup
         try:
-            cognite_client.data_modeling.instances.delete(
-                nodes=[(test_space.space, ts_external_id)]
-            )
+            cognite_client.data_modeling.instances.delete(nodes=[(test_space.space, ts_external_id)])
         except Exception:
             pass
 
-    def _create_instances_dict(
-        self, space: str, external_id: str
-    ) -> list[dict]:
+    def _create_instances_dict(self, space: str, external_id: str) -> list[dict]:
         """Helper to create instances dict for validation."""
         return [
             {

@@ -214,7 +214,8 @@ class CDFReadAPI(BaseReadAPI):
             instance_space: The instance spaces to extract. If None, all instance spaces are extracted.
             skip_cognite_views: If True, all Cognite Views are skipped. For example, if you have the CogniteAsset
                 view in you data model, it will ont be used to extract instances.
-            force_full_load: If True, forces a full reload even if cursors exist. Default is False (uses incremental sync).
+            force_full_load: If True, forces a full reload even if cursors exist.
+                Default is False (uses incremental sync).
 
         Returns:
             IssueList: A list of issues that occurred during the extraction.
@@ -223,10 +224,10 @@ class CDFReadAPI(BaseReadAPI):
             ```python
             # Initial load (full)
             neat.read.cdf.graph(dm_id, instance_space="my_space")
-            
+
             # Subsequent calls automatically use incremental sync
             neat.read.cdf.graph(dm_id, instance_space="my_space")
-            
+
             # Force full reload
             neat.read.cdf.graph(dm_id, instance_space="my_space", force_full_load=True)
             ```
@@ -239,18 +240,20 @@ class CDFReadAPI(BaseReadAPI):
             if stored_cursors:
                 cursors = stored_cursors
                 print(f"Using stored cursors for incremental sync ({len(cursors)} views)")
-        
+
         self._state._raise_exception_if_condition_not_met(
             "Read DMS Graph",
             empty_data_model_store_required=cursors is None,  # Only require empty stores if not doing incremental sync
             empty_instances_store_required=cursors is None,
             client_required=True,
         )
-        issues, new_cursors = self._graph(data_model_id, instance_space, skip_cognite_views, unpack_json=False, cursors=cursors)
-        
+        issues, new_cursors = self._graph(
+            data_model_id, instance_space, skip_cognite_views, unpack_json=False, cursors=cursors
+        )
+
         # Store the new cursors for next run
         self._state.instances.set_cursors(new_cursors)
-        
+
         return issues
 
     def _graph(
@@ -272,7 +275,7 @@ class CDFReadAPI(BaseReadAPI):
             str_to_ideal_type=str_to_ideal_type,
             cursors=cursors,
         )
-        
+
         # For incremental sync (when cursors provided), only extract instances, don't re-import data model
         if cursors is not None:
             extract_issues = self._state.instances.store.write(extractor)
@@ -281,7 +284,7 @@ class CDFReadAPI(BaseReadAPI):
         else:
             # Initial load: import both data model and instances
             issues = self._state.write_graph(extractor)
-        
+
         return issues, extractor.get_cursors()
 
     def raw(

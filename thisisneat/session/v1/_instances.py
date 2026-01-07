@@ -23,11 +23,11 @@ class InstancesAPI:
 
     def get_cursors(self) -> dict[str, str]:
         """Get the current DMS sync cursors.
-        
+
         Returns:
             dict[str, str]: Dictionary mapping view identifiers to cursor strings.
                 Keys are in format: "space:external_id:version:cursor_type"
-        
+
         Example:
             ```python
             cursors = neat.instances.get_cursors()
@@ -38,10 +38,10 @@ class InstancesAPI:
 
     def set_cursors(self, cursors: dict[str, str]) -> None:
         """Set the DMS sync cursors for incremental updates.
-        
+
         Args:
             cursors: Dictionary mapping view identifiers to cursor strings.
-        
+
         Example:
             ```python
             import json

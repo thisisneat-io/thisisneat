@@ -1,6 +1,6 @@
 """Tests for CDF SPARQL function registry."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from rdflib import Graph
