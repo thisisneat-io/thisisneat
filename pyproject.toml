@@ -62,6 +62,15 @@ docs = [
     "mistune==3.0.2",
     "mkdocs-autorefs>=0.5.0, <1.0.0",
 ]
+# Industrial Data Science Library for advanced data quality validation
+# See: https://indsl.docs.cognite.com/
+indsl = [
+    "indsl>=8.0.0, <9.0.0",
+]
+# Full data quality support with additional INDSL features
+data_quality = [
+    "indsl[stats]>=8.0.0, <9.0.0",
+]
 
 [project.urls]
 Documentation = "https://thisisneat.io/"

@@ -1,17 +1,34 @@
 """
 Validate instances with SHACL including auto-loading of referenced instances.
+
+Supports custom SPARQL functions for CDF SDK and INDSL data quality checks:
+- cdf_sdk: namespace for Cognite SDK functions (datapoints, aggregates)
+- cdf_indsl: namespace for INDSL data quality functions (optional)
+
+Reference:
+- INDSL Documentation: https://indsl.docs.cognite.com/
+- Data Quality Examples: https://indsl.docs.cognite.com/auto_examples/data_quality/index.html
 """
 
-import json
+import logging
 from typing import Any
-from rdflib import Graph, URIRef, Namespace
-from rdflib.namespace import RDF, SH
-from cognite.client import data_modeling as dm
 
+from cognite.client import data_modeling as dm
+from rdflib import Graph, Namespace
+from rdflib.namespace import RDF, SH
+
+from thisisneat.core._cdf_sparql_functions import (
+    get_registered_functions,
+    is_indsl_available,
+    register_cdf_sparql_functions,
+)
 from thisisneat.core._client import NeatClient
 from thisisneat.core._issues import IssueList
-from .exceptions import session_class_wrapper, NeatSessionError
+
 from ._state import SessionState
+from .exceptions import NeatSessionError, session_class_wrapper
+
+logger = logging.getLogger(__name__)
 
 
 @session_class_wrapper
@@ -29,11 +46,18 @@ class ValidateInstancesAPI:
         datamodel_external_id: str,
         datamodel_version: str,
         auto_load_depth: int = 2,
-        verbose: bool = True
+        enable_cdf_functions: bool = True,
+        verbose: bool = True,
     ) -> tuple[bool, str, str]:
         """
         Validate instances with SHACL rules, automatically loading referenced instances.
-        
+
+        Supports custom SPARQL functions for accessing CDF data and performing
+        data quality analysis directly from SHACL rules:
+
+        - cdf_sdk: namespace - Cognite SDK functions (datapoints, aggregates)
+        - cdf_indsl: namespace - INDSL data quality functions (requires INDSL)
+
         Args:
             instances: Simple list of DMS instance dicts, e.g.:
                 [
@@ -49,15 +73,16 @@ class ValidateInstancesAPI:
             datamodel_external_id: External ID of the data model
             datamodel_version: Version of the data model
             auto_load_depth: Maximum depth for auto-loading referenced instances (default: 2)
+            enable_cdf_functions: Enable cdf_sdk: and cdf_indsl: SPARQL functions (default: True)
             verbose: Print progress messages (default: True)
-        
+
         Returns:
             Tuple of (conforms, report_graph, report_text)
-        
+
         Example:
             ```python
             neat = NeatSession(client)
-            
+
             # Simple list of instance dicts
             instances = [
                 {
@@ -72,20 +97,56 @@ class ValidateInstancesAPI:
                     }
                 }
             ]
-            
+
+            # SHACL rules with CDF SPARQL functions
             shacl_rules = '''
                 @prefix sh: <http://www.w3.org/ns/shacl#> .
-                ...
+                @prefix cdf_sdk: <https://cognite.com/cdf/sdk/> .
+                @prefix ex: <http://example.org/> .
+
+                ex:TimeSeriesShape a sh:NodeShape ;
+                    sh:targetClass ex:TimeSeries ;
+                    sh:sparql [
+                        sh:message "Time series must have data in last 7 days" ;
+                        sh:select \"\"\"
+                            SELECT ?this WHERE {
+                                ?this a ex:TimeSeries .
+                                BIND(cdf_sdk:datapoints_count(?this, "7d-ago", "now") AS ?count)
+                                FILTER (?count < 1)
+                            }
+                        \"\"\" ;
+                    ] .
             '''
-            
+
             conforms, report_graph, report_text = neat.validate_instances.with_shacl(
                 instances=instances,
                 shacl_rules=shacl_rules,
                 datamodel_space="my_space",
                 datamodel_external_id="MyModel",
-                datamodel_version="v1"
+                datamodel_version="v1",
+                enable_cdf_functions=True  # Enable cdf_sdk: and cdf_indsl: functions
             )
             ```
+
+        Available SPARQL Functions (when enable_cdf_functions=True):
+
+        cdf_sdk: (always available)
+            - datapoints_aggregate(uri, aggregate, granularity, start, end)
+            - datapoints_count(uri, start, end)
+            - datapoints_latest(uri)
+            - datapoints_average(uri, start, end)
+            - datapoints_min(uri, start, end)
+            - datapoints_max(uri, start, end)
+            - timeseries_exists(uri)
+
+        cdf_indsl: (requires INDSL: pip install indsl)
+            - extreme_outliers(uri)
+            - value_decrease_check(uri, threshold)
+            - rolling_stddev_timedelta(uri, window_min, max_stddev)
+            - datapoint_diff(uri, period_h, threshold, tolerance_h)
+            - gaps_identification(uri, cutoff)
+            - low_density(uri, cutoff)
+            - out_of_range(uri)
         """
         self._state._raise_exception_if_condition_not_met(
             "Validate instances with SHACL",
@@ -144,28 +205,51 @@ class ValidateInstancesAPI:
                 datamodel_version,
                 namespace,
                 max_depth=auto_load_depth,
-                verbose=verbose
+                verbose=verbose,
             )
             if verbose:
                 print(f"  Auto-loaded {loaded_count} referenced instances")
-        
-        # 5. Validate with pyshacl
+
+        # 5. Register CDF SPARQL functions if enabled
+        if enable_cdf_functions:
+            if verbose:
+                print("  Registering CDF SPARQL functions...")
+
+            registered = register_cdf_sparql_functions(client, data_graph)
+
+            if verbose:
+                sdk_funcs = registered.get("cdf_sdk", [])
+                indsl_funcs = registered.get("cdf_indsl", [])
+                print(f"    cdf_sdk: {len(sdk_funcs)} functions ({', '.join(sdk_funcs[:3])}...)")
+                if indsl_funcs:
+                    print(f"    cdf_indsl: {len(indsl_funcs)} functions ({', '.join(indsl_funcs[:3])}...)")
+                else:
+                    print("    cdf_indsl: not available (install INDSL: pip install indsl)")
+
+        # 6. Validate with pyshacl
         if verbose:
             print("  Running SHACL validation...")
-        
+
         import pyshacl
+
+        # Use advanced=True to enable SPARQL-based constraints and custom functions
         conforms, report_graph, report_text = pyshacl.validate(
             data_graph=data_graph,
             shacl_graph=shacl_graph,
-            inference='none',
+            inference="none",
+            advanced=enable_cdf_functions,  # Enable custom SPARQL functions
             abort_on_first=False,
-            debug=False
+            debug=False,
         )
-        
+
         if verbose:
             print(f"  Validation {'PASSED' if conforms else 'FAILED'}")
-        
-        return conforms, report_graph.decode('utf-8') if isinstance(report_graph, bytes) else report_graph, report_text
+
+        return (
+            conforms,
+            report_graph.decode("utf-8") if isinstance(report_graph, bytes) else report_graph,
+            report_text,
+        )
     
     def _analyze_shacl_references(self, shacl_graph: Graph, verbose: bool = False) -> dict[str, list[dict]]:
         """

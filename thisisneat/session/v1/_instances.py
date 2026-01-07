@@ -138,31 +138,53 @@ class ValidateAPI:
     def __init__(self, state: SessionState) -> None:
         self._state = state
 
-    def __call__(self, io: Any) -> tuple[bool, str, str]:
-        """Here we should pass io which contains either shacl string, file path to shacl,
-        or a rdflib graph containing the shacl shapes.
+    def __call__(self, io: Any, enable_cdf_functions: bool = False) -> tuple[bool, str, str]:
+        """Validate instances in the graph store against SHACL shapes.
 
-        If None, neat should generate shacl shapes out of conpceptual data model in the session.
-        and then validate against the instances in the graph store.
+        Args:
+            io: SHACL shapes as string, file path, or rdflib Graph.
+                If None, NEAT should generate SHACL shapes from the conceptual data model.
+            enable_cdf_functions: Enable cdf_sdk: and cdf_indsl: SPARQL functions (default: False).
+                When True, SHACL rules can use custom functions to access CDF data:
+                - cdf_sdk:datapoints_aggregate, cdf_sdk:datapoints_count, etc.
+                - cdf_indsl:extreme_outliers, cdf_indsl:gaps_identification, etc. (requires INDSL)
 
-        Conversion to shacl shapes should always aim at using instance source as
-        first choice when comes to the actual URI of the class to which shapes relates
-        to...
+        Returns:
+            Tuple of (conforms: bool, report_graph: str, report_text: str)
 
+        Example:
+            ```python
+            # Basic validation
+            conforms, report, text = neat.instances.validate(shacl_rules)
+
+            # With CDF SPARQL functions enabled
+            conforms, report, text = neat.instances.validate(
+                shacl_rules,
+                enable_cdf_functions=True
+            )
+            ```
         """
-
         import pyshacl
 
         try:
             self._state.instances.store.graph(NEAT.ValidationGraph).parse(data=io)
-
         except Exception:
             self._state.instances.store.graph(NEAT.ValidationGraph).parse(io)
 
+        data_graph = self._state.instances.store.graph()
+        shacl_graph = self._state.instances.store.graph(NEAT.ValidationGraph)
+
+        # Register CDF SPARQL functions if enabled and client is available
+        if enable_cdf_functions and self._state.client is not None:
+            from thisisneat.core._cdf_sparql_functions import register_cdf_sparql_functions
+
+            register_cdf_sparql_functions(self._state.client, data_graph)
+
         conforms, report_graph, report_text = pyshacl.validate(
-            data_graph=self._state.instances.store.graph(),
-            shacl_graph=self._state.instances.store.graph(NEAT.ValidationGraph),
+            data_graph=data_graph,
+            shacl_graph=shacl_graph,
             inference="none",  # RDFS inference to match class hierarchies
+            advanced=enable_cdf_functions,  # Enable custom SPARQL functions
             debug=False,
             serialize_report_graph="ttl",
         )
