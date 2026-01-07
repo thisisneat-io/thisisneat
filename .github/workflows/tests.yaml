@@ -1,0 +1,95 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install the project
+        run: uv sync --all-groups
+
+      - name: Run ruff check
+        run: uv run ruff check .
+
+      - name: Run ruff format check
+        run: uv run ruff format --check .
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install the project
+        run: uv sync --all-groups
+
+      - name: Run unit tests
+        run: uv run pytest tests/tests_unit -v --tb=short
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install the project with INDSL
+        run: uv sync --all-groups --extra data_quality
+
+      - name: Run integration tests
+        env:
+          CDF_CLUSTER: ${{ vars.COGNITE_CLUSTER }}
+          CDF_PROJECT: ${{ vars.COGNITE_PROJECT }}
+          IDP_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          IDP_CLIENT_ID: ${{ secrets.COGNITE_CLIENT_ID }}
+          IDP_CLIENT_SECRET: ${{ secrets.COGNITE_CLIENT_SECRET }}
+        run: |
+          uv run pytest tests/tests_integration -v --tb=short -x
+
+  integration-tests-cdf-sparql:
+    name: CDF SPARQL Function Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install the project with INDSL
+        run: uv sync --all-groups --extra data_quality
+
+      - name: Run CDF SPARQL function tests
+        env:
+          CDF_CLUSTER: ${{ vars.COGNITE_CLUSTER }}
+          CDF_PROJECT: ${{ vars.COGNITE_PROJECT }}
+          IDP_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          IDP_CLIENT_ID: ${{ secrets.COGNITE_CLIENT_ID }}
+          IDP_CLIENT_SECRET: ${{ secrets.COGNITE_CLIENT_SECRET }}
+        run: |
+          uv run pytest tests/tests_integration/test_session/test_cdf_sparql_functions.py -v --tb=short
+

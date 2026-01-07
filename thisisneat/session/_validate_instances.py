@@ -46,7 +46,6 @@ class ValidateInstancesAPI:
         datamodel_external_id: str,
         datamodel_version: str,
         auto_load_depth: int = 2,
-        enable_cdf_functions: bool = True,
         verbose: bool = True,
     ) -> tuple[bool, str, str]:
         """
@@ -73,7 +72,6 @@ class ValidateInstancesAPI:
             datamodel_external_id: External ID of the data model
             datamodel_version: Version of the data model
             auto_load_depth: Maximum depth for auto-loading referenced instances (default: 2)
-            enable_cdf_functions: Enable cdf_sdk: and cdf_indsl: SPARQL functions (default: True)
             verbose: Print progress messages (default: True)
 
         Returns:
@@ -123,12 +121,11 @@ class ValidateInstancesAPI:
                 shacl_rules=shacl_rules,
                 datamodel_space="my_space",
                 datamodel_external_id="MyModel",
-                datamodel_version="v1",
-                enable_cdf_functions=True  # Enable cdf_sdk: and cdf_indsl: functions
+                datamodel_version="v1"
             )
             ```
 
-        Available SPARQL Functions (when enable_cdf_functions=True):
+        Available SPARQL Functions:
 
         cdf_sdk: (always available)
             - datapoints_aggregate(uri, aggregate, granularity, start, end)
@@ -210,21 +207,20 @@ class ValidateInstancesAPI:
             if verbose:
                 print(f"  Auto-loaded {loaded_count} referenced instances")
 
-        # 5. Register CDF SPARQL functions if enabled
-        if enable_cdf_functions:
-            if verbose:
-                print("  Registering CDF SPARQL functions...")
+        # 5. Register CDF SPARQL functions (always enabled)
+        if verbose:
+            print("  Registering CDF SPARQL functions...")
 
-            registered = register_cdf_sparql_functions(client, data_graph)
+        registered = register_cdf_sparql_functions(client, data_graph)
 
-            if verbose:
-                sdk_funcs = registered.get("cdf_sdk", [])
-                indsl_funcs = registered.get("cdf_indsl", [])
-                print(f"    cdf_sdk: {len(sdk_funcs)} functions ({', '.join(sdk_funcs[:3])}...)")
-                if indsl_funcs:
-                    print(f"    cdf_indsl: {len(indsl_funcs)} functions ({', '.join(indsl_funcs[:3])}...)")
-                else:
-                    print("    cdf_indsl: not available (install INDSL: pip install indsl)")
+        if verbose:
+            sdk_funcs = registered.get("cdf_sdk", [])
+            indsl_funcs = registered.get("cdf_indsl", [])
+            print(f"    cdf_sdk: {len(sdk_funcs)} functions ({', '.join(sdk_funcs[:3])}...)")
+            if indsl_funcs:
+                print(f"    cdf_indsl: {len(indsl_funcs)} functions ({', '.join(indsl_funcs[:3])}...)")
+            else:
+                print("    cdf_indsl: not available (install INDSL: pip install indsl)")
 
         # 6. Validate with pyshacl
         if verbose:
@@ -232,12 +228,10 @@ class ValidateInstancesAPI:
 
         import pyshacl
 
-        # Use advanced=True to enable SPARQL-based constraints and custom functions
         conforms, report_graph, report_text = pyshacl.validate(
             data_graph=data_graph,
             shacl_graph=shacl_graph,
             inference="none",
-            advanced=enable_cdf_functions,  # Enable custom SPARQL functions
             abort_on_first=False,
             debug=False,
         )

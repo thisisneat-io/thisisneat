@@ -60,20 +60,20 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
         end: str = "now",
     ) -> Literal:
         """
-        Aggregate datapoints for a time series using instance_id.
+        Aggregate datapoints for a time series using SDK aggregation.
 
         Supported aggregates: count, average, min, max, sum, interpolation,
         step_interpolation, continuous_variance, discrete_variance, total_variation.
 
         Args:
             timeseries_uri: URI containing space and external_id
-            aggregate: Aggregation type (default: count)
+            aggregate: Aggregation type (e.g., count, average, min, max, sum)
             granularity: Time granularity (e.g., 1h, 1d, 1w)
             start: Start time (e.g., "30d-ago", "2024-01-01")
             end: End time (e.g., "now", "2024-12-31")
 
         Returns:
-            Sum of aggregated values as Literal (for count, this is total count)
+            Sum of aggregated values across all granularity buckets as Literal
         """
         # Convert rdflib types to Python
         timeseries_uri = literal_to_python(timeseries_uri)
@@ -84,7 +84,8 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
 
         instance_id = parse_instance_id_from_uri(timeseries_uri)
 
-        result = client.time_series.data.aggregate(
+        # Use SDK aggregation - returns Datapoints object with aggregate values
+        result = client.time_series.data.retrieve(
             instance_id=instance_id,
             aggregates=[aggregate],
             granularity=granularity,
@@ -92,20 +93,21 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
             end=end,
         )
 
-        if result and len(result) > 0:
-            # Sum up all aggregate values across the granularity buckets
-            total = 0.0
-            for datapoint in result[0].datapoints:
-                value = getattr(datapoint, aggregate, None)
-                if value is not None:
-                    total += float(value)
-            return Literal(total)
+        if result is None or len(result) == 0:
+            return Literal(0)
 
-        return Literal(0)
+        # Sum up all aggregate values across the granularity buckets
+        total = 0.0
+        for datapoint in result:
+            value = getattr(datapoint, aggregate, None)
+            if value is not None:
+                total += float(value)
+
+        return Literal(total)
 
     wrappers["datapoints_aggregate"] = datapoints_aggregate
 
-    # 2. Datapoints Count (convenience wrapper)
+    # 2. Datapoints Count (convenience wrapper using SDK aggregation)
     @safe_sparql_wrapper(default_value=Literal(0))
     def datapoints_count(
         timeseries_uri: str,
@@ -113,7 +115,7 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
         end: str = "now",
     ) -> Literal:
         """
-        Count datapoints in a time range (simpler than aggregate).
+        Count datapoints in a time range using SDK aggregation.
 
         Args:
             timeseries_uri: URI containing space and external_id
@@ -121,7 +123,7 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
             end: End time
 
         Returns:
-            Number of datapoints as Literal
+            Total number of datapoints as Literal
         """
         timeseries_uri = literal_to_python(timeseries_uri)
         start = literal_to_python(start)
@@ -129,16 +131,25 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
 
         instance_id = parse_instance_id_from_uri(timeseries_uri)
 
+        # Use SDK aggregation with count - use largest granularity for efficiency
         result = client.time_series.data.retrieve(
             instance_id=instance_id,
+            aggregates=["count"],
+            granularity="1d",  # Daily buckets
             start=start,
             end=end,
         )
 
-        if result and len(result) > 0:
-            return Literal(len(result[0]))
+        if result is None or len(result) == 0:
+            return Literal(0)
 
-        return Literal(0)
+        # Sum counts across all daily buckets
+        total_count = 0
+        for datapoint in result:
+            if datapoint.count is not None:
+                total_count += datapoint.count
+
+        return Literal(total_count)
 
     wrappers["datapoints_count"] = datapoints_count
 
@@ -192,7 +203,7 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
 
     wrappers["timeseries_exists"] = timeseries_exists
 
-    # 5. Datapoints Average
+    # 5. Datapoints Average (using SDK aggregation)
     @safe_sparql_wrapper(default_value=Literal(float("nan")))
     def datapoints_average(
         timeseries_uri: str,
@@ -200,7 +211,7 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
         end: str = "now",
     ) -> Literal:
         """
-        Calculate average value over time range.
+        Calculate weighted average value over time range using SDK aggregation.
 
         Args:
             timeseries_uri: URI containing space and external_id
@@ -208,7 +219,7 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
             end: End time
 
         Returns:
-            Average value as Literal
+            Weighted average value as Literal
         """
         timeseries_uri = literal_to_python(timeseries_uri)
         start = literal_to_python(start)
@@ -216,23 +227,34 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
 
         instance_id = parse_instance_id_from_uri(timeseries_uri)
 
-        # Get all datapoints and calculate average
+        # Use SDK aggregation with both average and count to compute weighted average
         result = client.time_series.data.retrieve(
             instance_id=instance_id,
+            aggregates=["average", "count"],
+            granularity="1d",
             start=start,
             end=end,
         )
 
-        if result and len(result) > 0 and len(result[0]) > 0:
-            df = result.to_pandas()
-            if not df.empty:
-                return Literal(float(df.iloc[:, 0].mean()))
+        if result is None or len(result) == 0:
+            return Literal(float("nan"))
+
+        # Compute weighted average across buckets
+        total_weighted = 0.0
+        total_count = 0
+        for datapoint in result:
+            if datapoint.average is not None and datapoint.count is not None:
+                total_weighted += datapoint.average * datapoint.count
+                total_count += datapoint.count
+
+        if total_count > 0:
+            return Literal(total_weighted / total_count)
 
         return Literal(float("nan"))
 
     wrappers["datapoints_average"] = datapoints_average
 
-    # 6. Datapoints Min
+    # 6. Datapoints Min (using SDK aggregation)
     @safe_sparql_wrapper(default_value=Literal(float("nan")))
     def datapoints_min(
         timeseries_uri: str,
@@ -240,7 +262,7 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
         end: str = "now",
     ) -> Literal:
         """
-        Get minimum value over time range.
+        Get minimum value over time range using SDK aggregation.
 
         Args:
             timeseries_uri: URI containing space and external_id
@@ -256,22 +278,33 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
 
         instance_id = parse_instance_id_from_uri(timeseries_uri)
 
+        # Use SDK aggregation with min
         result = client.time_series.data.retrieve(
             instance_id=instance_id,
+            aggregates=["min"],
+            granularity="1d",
             start=start,
             end=end,
         )
 
-        if result and len(result) > 0 and len(result[0]) > 0:
-            df = result.to_pandas()
-            if not df.empty:
-                return Literal(float(df.iloc[:, 0].min()))
+        if result is None or len(result) == 0:
+            return Literal(float("nan"))
+
+        # Get minimum across all buckets
+        min_value = None
+        for datapoint in result:
+            if datapoint.min is not None:
+                if min_value is None or datapoint.min < min_value:
+                    min_value = datapoint.min
+
+        if min_value is not None:
+            return Literal(float(min_value))
 
         return Literal(float("nan"))
 
     wrappers["datapoints_min"] = datapoints_min
 
-    # 7. Datapoints Max
+    # 7. Datapoints Max (using SDK aggregation)
     @safe_sparql_wrapper(default_value=Literal(float("nan")))
     def datapoints_max(
         timeseries_uri: str,
@@ -279,7 +312,7 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
         end: str = "now",
     ) -> Literal:
         """
-        Get maximum value over time range.
+        Get maximum value over time range using SDK aggregation.
 
         Args:
             timeseries_uri: URI containing space and external_id
@@ -295,16 +328,27 @@ def create_sdk_wrappers(client: "CogniteClient") -> dict[str, Callable]:
 
         instance_id = parse_instance_id_from_uri(timeseries_uri)
 
+        # Use SDK aggregation with max
         result = client.time_series.data.retrieve(
             instance_id=instance_id,
+            aggregates=["max"],
+            granularity="1d",
             start=start,
             end=end,
         )
 
-        if result and len(result) > 0 and len(result[0]) > 0:
-            df = result.to_pandas()
-            if not df.empty:
-                return Literal(float(df.iloc[:, 0].max()))
+        if result is None or len(result) == 0:
+            return Literal(float("nan"))
+
+        # Get maximum across all buckets
+        max_value = None
+        for datapoint in result:
+            if datapoint.max is not None:
+                if max_value is None or datapoint.max > max_value:
+                    max_value = datapoint.max
+
+        if max_value is not None:
+            return Literal(float(max_value))
 
         return Literal(float("nan"))
 

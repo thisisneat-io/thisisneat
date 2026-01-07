@@ -57,7 +57,7 @@ def parse_instance_id_from_uri(uri: URIRef | str) -> "NodeId":
         ValueError: If URI format is not recognized
 
     Example:
-        >>> from cognite.client.data_classes import NodeId
+        >>> from cognite.client.data_classes.data_modeling import NodeId
         >>> node_id = parse_instance_id_from_uri("http://purl.org/cognite/my_space/TimeSeries/ts-001")
         >>> node_id.space
         'my_space'
@@ -89,12 +89,44 @@ def parse_instance_id_from_uri(uri: URIRef | str) -> "NodeId":
     )
 
 
+def verify_timeseries_exists(
+    client: "CogniteClient",
+    instance_id: "NodeId",
+) -> bool:
+    """
+    Verify that an instance_id corresponds to a valid time series in CDF.
+
+    This implements Option B from the architecture: explicit type checking
+    to ensure only actual time series are validated.
+
+    Args:
+        client: CogniteClient instance
+        instance_id: NodeId with space and external_id
+
+    Returns:
+        True if the instance_id corresponds to a valid time series, False otherwise
+
+    Example:
+        >>> from cognite.client.data_classes.data_modeling import NodeId
+        >>> instance_id = NodeId(space="timeseries", external_id="ts-001")
+        >>> verify_timeseries_exists(client, instance_id)
+        True
+    """
+    try:
+        ts = client.time_series.retrieve(instance_id=instance_id)
+        return ts is not None
+    except Exception as e:
+        logger.debug(f"Time series verification failed for {instance_id}: {e}")
+        return False
+
+
 def get_timeseries_datapoints(
     client: "CogniteClient",
     instance_id: "NodeId",
     start: str = "30d-ago",
     end: str = "now",
     limit: int | None = None,
+    verify_exists: bool = False,
 ) -> pd.Series:
     """
     Retrieve time series datapoints as a pandas Series.
@@ -108,19 +140,25 @@ def get_timeseries_datapoints(
         start: Start time (default: 30 days ago)
         end: End time (default: now)
         limit: Maximum number of datapoints to retrieve
+        verify_exists: If True, verify time series exists before fetching (default: False)
 
     Returns:
         pandas Series with timestamps as index and values as data.
-        Returns empty Series if no data found.
+        Returns empty Series if no data found or time series doesn't exist.
 
     Example:
-        >>> from cognite.client.data_classes import NodeId
+        >>> from cognite.client.data_classes.data_modeling import NodeId
         >>> instance_id = NodeId(space="my_space", external_id="ts-001")
         >>> data = get_timeseries_datapoints(client, instance_id, start="7d-ago")
         >>> len(data)
         168  # hourly data for 7 days
     """
     try:
+        # Optional: verify time series exists first
+        if verify_exists and not verify_timeseries_exists(client, instance_id):
+            logger.debug(f"Time series {instance_id} does not exist")
+            return pd.Series(dtype=float)
+
         result = client.time_series.data.retrieve(
             instance_id=instance_id,
             start=start,
@@ -193,10 +231,13 @@ def create_datapoints_fetcher(client: "CogniteClient") -> Callable[["NodeId"], p
     # Use a cache with reasonable size for validation runs
     @lru_cache(maxsize=100)
     def _cached_fetch(space: str, external_id: str) -> pd.Series:
-        from cognite.client.data_classes import NodeId
+        from cognite.client.data_classes.data_modeling import NodeId
 
         instance_id = NodeId(space=space, external_id=external_id)
-        return get_timeseries_datapoints(client, instance_id)
+        # Use 7 days and limit to 10000 datapoints for reasonable performance
+        return get_timeseries_datapoints(
+            client, instance_id, start="7d-ago", end="now", limit=10000
+        )
 
     def fetch(instance_id: "NodeId") -> pd.Series:
         return _cached_fetch(instance_id.space, instance_id.external_id)

@@ -333,4 +333,3 @@ class TestSHACLValidation:
         )
 
         assert conforms is True, f"Validation should pass. Report: {report_text}"
-

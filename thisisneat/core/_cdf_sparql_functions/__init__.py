@@ -36,11 +36,10 @@ Usage in Python:
     # Register functions before validation
     register_cdf_sparql_functions(client, data_graph)
 
-    # Run validation with advanced=True to enable SPARQL functions
+    # Run validation
     conforms, report, text = pyshacl.validate(
         data_graph=data_graph,
         shacl_graph=shacl_graph,
-        advanced=True,  # Required for custom SPARQL functions
     )
     ```
 
@@ -70,6 +69,7 @@ from ._helpers import (
     literal_to_python,
     parse_instance_id_from_uri,
     safe_sparql_wrapper,
+    verify_timeseries_exists,
 )
 from ._indsl_wrappers import (
     create_indsl_wrappers,
@@ -102,6 +102,7 @@ __all__ = [
     # Helpers
     "parse_instance_id_from_uri",
     "get_timeseries_datapoints",
+    "verify_timeseries_exists",
     "create_datapoints_fetcher",
     "literal_to_python",
     "safe_sparql_wrapper",

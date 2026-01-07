@@ -5,13 +5,13 @@ Provides data quality and analysis functions from Cognite's Industrial
 Data Science Library (INDSL). INDSL is an optional dependency.
 
 Functions available (when INDSL is installed):
-- cdf_indsl:extreme_outliers - Detect extreme outliers
-- cdf_indsl:value_decrease_check - Check for decreasing values
-- cdf_indsl:rolling_stddev_timedelta - Rolling stddev of time delta
-- cdf_indsl:datapoint_diff - Threshold breach check
-- cdf_indsl:gaps_identification - Identify gaps in time series
-- cdf_indsl:low_density - Identify low density periods
-- cdf_indsl:out_of_range - Detect out of range values
+- cdf_indsl:extreme_outliers(ts, alpha, bc_relaxation, poly_order) - Detect extreme outliers
+- cdf_indsl:value_decrease_check(ts, threshold) - Check for decreasing values
+- cdf_indsl:rolling_stddev_timedelta(ts, time_window_minutes, max_stddev_seconds) - Rolling stddev
+- cdf_indsl:datapoint_diff(ts, time_period_hours, threshold, tolerance_hours) - Diff check
+- cdf_indsl:gaps_identification(ts, cutoff) - Identify gaps in time series
+- cdf_indsl:low_density(ts, cutoff) - Identify low density periods
+- cdf_indsl:out_of_range(ts) - Detect out of range values using IQR method
 
 Reference:
 - INDSL Documentation: https://indsl.docs.cognite.com/
@@ -101,18 +101,30 @@ def create_indsl_wrappers(client: "CogniteClient") -> dict[str, Callable]:
     # 1. Extreme Outliers Detection
     # Based on: https://indsl.docs.cognite.com/auto_examples/data_quality/plot_extreme_outlier.html
     @safe_sparql_wrapper(default_value=Literal(False))
-    def extreme_outliers_wrapper(timeseries_uri: str) -> Literal:
+    def extreme_outliers_wrapper(
+        timeseries_uri: str,
+        alpha: float = 0.05,
+        bc_relaxation: float = 0.167,
+        poly_order: int = 3,
+    ) -> Literal:
         """
         Detect extreme outliers in time series using polynomial regression
         and Studentized residuals.
 
         Args:
             timeseries_uri: URI containing space and external_id
+            alpha: Significance level (0-1). Higher = more lenient. Default 0.05
+            bc_relaxation: Bonferroni relaxation factor. Smaller = more conservative. Default 0.167
+            poly_order: Polynomial order for curve fitting. Default 3
 
         Returns:
             True if extreme outliers are detected, False otherwise
         """
         timeseries_uri = literal_to_python(timeseries_uri)
+        alpha = float(literal_to_python(alpha))
+        bc_relaxation = float(literal_to_python(bc_relaxation))
+        poly_order = int(literal_to_python(poly_order))
+
         instance_id = parse_instance_id_from_uri(timeseries_uri)
         data = fetch_datapoints(instance_id)
 
@@ -120,7 +132,7 @@ def create_indsl_wrappers(client: "CogniteClient") -> dict[str, Callable]:
             return Literal(False)
 
         try:
-            filtered = extreme(data)
+            filtered = extreme(data, alpha=alpha, bc_relaxation=bc_relaxation, poly_order=poly_order)
             # If filtered data has fewer points, outliers were removed
             has_outliers = len(filtered) < len(data)
             return Literal(has_outliers)

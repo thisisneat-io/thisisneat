@@ -10,8 +10,8 @@ Usage:
     # In validation code:
     register_cdf_sparql_functions(client, data_graph)
 
-    # Then run pyshacl with advanced=True
-    pyshacl.validate(..., advanced=True)
+    # Then run pyshacl
+    pyshacl.validate(...)
 """
 from __future__ import annotations
 
