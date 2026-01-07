@@ -4,6 +4,15 @@ import pandas as pd
 import pytest
 
 from tests.config import DOC_RULES
+from tests.data import SchemaData
+from thisisneat.core._client.data_classes.schema import DMSSchema
+from thisisneat.core._data_model.importers import ExcelImporter
+from thisisneat.core._data_model.models import (
+    ConceptualDataModel,
+    PhysicalDataModel,
+)
+from thisisneat.core._data_model.models.physical import UnverifiedPhysicalDataModel
+from thisisneat.core._utils.spreadsheet import read_individual_sheet
 
 
 @pytest.fixture(autouse=True)
@@ -22,15 +31,6 @@ def cleanup_cdf_sparql_functions():
         unregister_cdf_sparql_functions()
     except ImportError:
         pass  # Module not available, nothing to cleanup
-from tests.data import SchemaData
-from thisisneat.core._client.data_classes.schema import DMSSchema
-from thisisneat.core._data_model.importers import ExcelImporter
-from thisisneat.core._data_model.models import (
-    ConceptualDataModel,
-    PhysicalDataModel,
-)
-from thisisneat.core._data_model.models.physical import UnverifiedPhysicalDataModel
-from thisisneat.core._utils.spreadsheet import read_individual_sheet
 
 
 @pytest.fixture(scope="session")
