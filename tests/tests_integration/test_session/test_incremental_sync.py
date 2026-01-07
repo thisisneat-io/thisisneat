@@ -314,9 +314,7 @@ class TestIncrementalDMSSync:
         finally:
             neat.close()
 
-    def test_set_cursors_manually(
-        self, cognite_client: CogniteClient, test_space: dm.Space, tmp_path: Path
-    ) -> None:
+    def test_set_cursors_manually(self, cognite_client: CogniteClient, test_space: dm.Space, tmp_path: Path) -> None:
         """Test that cursors can be set manually and are persisted."""
         storage_path = tmp_path / "neat_store"
         cursors_file = storage_path / "dms_cursors.json"

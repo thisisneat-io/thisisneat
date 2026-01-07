@@ -130,4 +130,3 @@ class TestUnregisterCdfSparqlFunctions:
         # Should be able to register again without force
         result = register_cdf_sparql_functions(mock_client, force=False)
         assert len(result["cdf_sdk"]) > 0
-

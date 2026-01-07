@@ -235,4 +235,3 @@ class TestDatapointsLatestWrapper:
         import math
 
         assert math.isnan(result.toPython())
-

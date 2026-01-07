@@ -176,4 +176,3 @@ class TestSafeSparqlWrapper:
 
         result = kwargs_func("test", prefix="my_")
         assert result == Literal("my_test")
-
