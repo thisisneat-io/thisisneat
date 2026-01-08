@@ -44,6 +44,8 @@ class ValidateInstancesAPI:
         datamodel_version: str,
         auto_load_depth: int = 2,
         verbose: bool = True,
+        default_view_space: str | None = None,
+        default_view_name: str | None = None,
     ) -> tuple[bool, str, str]:
         """
         Validate instances with SHACL rules, automatically loading referenced instances.
@@ -64,12 +66,16 @@ class ValidateInstancesAPI:
                     },
                     ...
                 ]
+                For instances without properties, provide default_view_space and
+                default_view_name to ensure type triples are created.
             shacl_rules: SHACL rules as Turtle string
             datamodel_space: Space of the data model
             datamodel_external_id: External ID of the data model
             datamodel_version: Version of the data model
             auto_load_depth: Maximum depth for auto-loading referenced instances (default: 2)
             verbose: Print progress messages (default: True)
+            default_view_space: Default view space for instances without properties
+            default_view_name: Default view name for instances without properties
 
         Returns:
             Tuple of (conforms, report_graph, report_text)
@@ -167,7 +173,9 @@ class ValidateInstancesAPI:
         data_graph.bind(datamodel_space, namespace)
 
         for instance in instances:
-            self._add_instance_to_graph(data_graph, instance, namespace, datamodel_space)
+            self._add_instance_to_graph(
+                data_graph, instance, namespace, datamodel_space, default_view_space, default_view_name
+            )
 
         if verbose:
             print(f"  Converted instances to {len(data_graph)} RDF triples")
@@ -283,7 +291,13 @@ class ValidateInstancesAPI:
         return reference_map
 
     def _add_instance_to_graph(
-        self, graph: Graph, instance: dict[str, Any], default_namespace: Namespace, datamodel_space: str
+        self,
+        graph: Graph,
+        instance: dict[str, Any],
+        default_namespace: Namespace,
+        datamodel_space: str,
+        default_view_space: str | None = None,
+        default_view_name: str | None = None,
     ) -> None:
         """Convert a DMS instance dict to RDF triples.
 
@@ -292,6 +306,9 @@ class ValidateInstancesAPI:
         - Type: Based on view space + view name
         - Predicates: Based on view space + view name
         - Reference objects: Based on reference space + externalId
+
+        If the instance has no properties but default_view_space and default_view_name
+        are provided, a type triple will still be added using those defaults.
         """
         external_id = instance.get("externalId")
         if not external_id:
@@ -306,6 +323,13 @@ class ValidateInstancesAPI:
 
         # Add type and properties based on each view
         properties = instance.get("properties", {})
+
+        # If no properties but default view provided, add type triple
+        if not properties and default_view_space and default_view_name:
+            view_ns = Namespace(f"http://purl.org/cognite/{default_view_space}/{default_view_name}/")
+            graph.add((subject, RDF.type, view_ns[default_view_name]))
+            return
+
         for view_space, views in properties.items():
             for view_version, props in views.items():
                 # Extract view name from "ViewName/version" format
