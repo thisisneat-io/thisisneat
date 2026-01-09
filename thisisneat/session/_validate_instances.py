@@ -18,6 +18,7 @@ from rdflib import Graph, Namespace
 from rdflib.namespace import RDF, SH
 
 from thisisneat.core._cdf_sparql_functions import (
+    get_new_cursor,
     register_cdf_sparql_functions,
 )
 from thisisneat.core._client import NeatClient
@@ -46,7 +47,13 @@ class ValidateInstancesAPI:
         verbose: bool = True,
         default_view_space: str | None = None,
         default_view_name: str | None = None,
-    ) -> tuple[bool, str, str]:
+        # Data fetching mode parameters (for CDF SPARQL functions)
+        subscription_external_id: str | None = None,
+        subscription_cursor: str | None = None,
+        subscription_partitions: int = 1,
+        backfill_start: str | None = None,
+        backfill_end: str | None = None,
+    ) -> tuple[bool, str, str, str | None]:
         """
         Validate instances with SHACL rules, automatically loading referenced instances.
 
@@ -76,9 +83,18 @@ class ValidateInstancesAPI:
             verbose: Print progress messages (default: True)
             default_view_space: Default view space for instances without properties
             default_view_name: Default view name for instances without properties
+            subscription_external_id: External ID of Data Point Subscription for incremental mode
+            subscription_cursor: Cursor from previous subscription fetch
+            subscription_partitions: Number of subscription partitions to read (default: 1)
+            backfill_start: Start time for backfill mode (e.g., "30d-ago")
+            backfill_end: End time for backfill mode (e.g., "now")
 
         Returns:
-            Tuple of (conforms, report_graph, report_text)
+            Tuple of (conforms, report_graph, report_text, new_cursor)
+            - conforms: True if all instances pass validation
+            - report_graph: SHACL validation report as Turtle string
+            - report_text: Human-readable validation report
+            - new_cursor: New subscription cursor (if subscription mode) or None
 
         Example:
             ```python
@@ -211,9 +227,18 @@ class ValidateInstancesAPI:
 
         # 5. Register CDF SPARQL functions (always enabled)
         if verbose:
-            print("  Registering CDF SPARQL functions...")
+            mode = "subscription" if subscription_external_id else "backfill" if backfill_start else "normal"
+            print(f"  Registering CDF SPARQL functions (mode: {mode})...")
 
-        registered = register_cdf_sparql_functions(client, data_graph)
+        registered = register_cdf_sparql_functions(
+            client,
+            data_graph,
+            subscription_external_id=subscription_external_id,
+            subscription_cursor=subscription_cursor,
+            subscription_partitions=subscription_partitions,
+            backfill_start=backfill_start,
+            backfill_end=backfill_end,
+        )
 
         if verbose:
             sdk_funcs = registered.get("cdf_sdk", [])
@@ -241,10 +266,16 @@ class ValidateInstancesAPI:
         if verbose:
             print(f"  Validation {'PASSED' if conforms else 'FAILED'}")
 
+        # Get new cursor if subscription mode was used
+        new_cursor = get_new_cursor()
+        if verbose and new_cursor:
+            print(f"  New subscription cursor available (length: {len(new_cursor)})")
+
         return (
             conforms,
             report_graph.decode("utf-8") if isinstance(report_graph, bytes) else report_graph,
             report_text,
+            new_cursor,
         )
 
     def _analyze_shacl_references(self, shacl_graph: Graph, verbose: bool = False) -> dict[str, list[dict]]:

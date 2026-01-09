@@ -4,14 +4,39 @@ Registry for CDF SPARQL custom functions.
 Registers cdf_sdk: and cdf_indsl: namespace functions with rdflib's
 SPARQL engine for use in SHACL validation constraints.
 
+Supports three data fetching modes:
+1. Normal mode (default): Fetch data with default time range (7d-ago to now)
+2. Subscription mode: Fetch from Data Point Subscription for incremental updates
+3. Backfill mode: Fetch historic data with custom time range
+
 Usage:
     from thisisneat.core._cdf_sparql_functions import register_cdf_sparql_functions
 
-    # In validation code:
+    # Normal mode (default)
     register_cdf_sparql_functions(client, data_graph)
+
+    # Subscription mode (incremental)
+    register_cdf_sparql_functions(
+        client,
+        data_graph,
+        subscription_external_id="my_subscription",
+        subscription_cursor="abc123...",
+    )
+
+    # Backfill mode (historic data)
+    register_cdf_sparql_functions(
+        client,
+        data_graph,
+        backfill_start="30d-ago",
+        backfill_end="now",
+    )
 
     # Then run pyshacl
     pyshacl.validate(...)
+
+    # After validation, get new cursor (subscription mode)
+    from thisisneat.core._cdf_sparql_functions import get_new_cursor
+    new_cursor = get_new_cursor()
 """
 
 from __future__ import annotations
@@ -63,6 +88,15 @@ def register_cdf_sparql_functions(
     client: CogniteClient,
     graph: Graph | None = None,
     force: bool = False,
+    # Subscription mode parameters
+    subscription_external_id: str | None = None,
+    subscription_cursor: str | None = None,
+    subscription_partitions: int = 1,
+    # Backfill mode parameters
+    backfill_start: str | None = None,
+    backfill_end: str | None = None,
+    # Common parameters
+    limit: int | None = None,
 ) -> dict[str, list[str]]:
     """
     Register CDF SDK and INDSL functions with rdflib's SPARQL engine.
@@ -70,31 +104,88 @@ def register_cdf_sparql_functions(
     This enables SHACL rules to use cdf_sdk: and cdf_indsl: prefixed
     functions in sh:sparql constraints.
 
+    Supports three modes:
+
+    **Normal mode (default):**
+        Fetches last 7 days of data from Time Series API.
+        ```python
+        register_cdf_sparql_functions(client, graph)
+        ```
+
+    **Subscription mode:**
+        Fetches changes from a Data Point Subscription since the cursor.
+        Use for incremental validation.
+        ```python
+        register_cdf_sparql_functions(
+            client, graph,
+            subscription_external_id="my_subscription",
+            subscription_cursor="abc123...",  # From previous run
+        )
+        # After validation:
+        new_cursor = get_new_cursor()
+        ```
+
+    **Backfill mode:**
+        Fetches historic data with custom time range.
+        Use for initial validation of new time series.
+        ```python
+        register_cdf_sparql_functions(
+            client, graph,
+            backfill_start="30d-ago",
+            backfill_end="now",
+        )
+        ```
+
     Args:
         client: CogniteClient for CDF operations (from session state)
         graph: Optional rdflib Graph to bind namespaces to
         force: Force re-registration even if already registered
+        subscription_external_id: External ID of Data Point Subscription (enables subscription mode)
+        subscription_cursor: Cursor from previous subscription fetch
+        subscription_partitions: Number of partitions to read (default: 1)
+        backfill_start: Start time for backfill mode (e.g., "30d-ago")
+        backfill_end: End time for backfill mode (e.g., "now")
+        limit: Maximum datapoints per time series (optional)
 
     Returns:
         Dict with 'cdf_sdk' and 'cdf_indsl' keys listing registered function names
-
-    Example:
-        ```python
-        from thisisneat.core._cdf_sparql_functions import register_cdf_sparql_functions
-
-        # Register functions using session client
-        registered = register_cdf_sparql_functions(neat._state.client, data_graph)
-
-        # Now SHACL rules can use:
-        # cdf_sdk:datapoints_aggregate(?this, "count", "1h", "7d-ago", "now")
-        # cdf_indsl:extreme_outliers(?this)
-        ```
     """
     global _REGISTERED
+
+    from ._helpers import DataFetchConfig, set_fetch_config
 
     if _REGISTERED and not force:
         logger.debug("CDF SPARQL functions already registered, skipping")
         return {"cdf_sdk": [], "cdf_indsl": []}
+
+    # Determine fetch mode and create config
+    if subscription_external_id:
+        # Subscription mode
+        config = DataFetchConfig.subscription(
+            external_id=subscription_external_id,
+            cursor=subscription_cursor,
+            partitions=subscription_partitions,
+        )
+        logger.info(f"CDF SPARQL functions: subscription mode (external_id={subscription_external_id})")
+    elif backfill_start:
+        # Backfill mode
+        config = DataFetchConfig.backfill(
+            start=backfill_start,
+            end=backfill_end or "now",
+            limit=limit,
+        )
+        logger.info(f"CDF SPARQL functions: backfill mode ({backfill_start} to {backfill_end or 'now'})")
+    else:
+        # Normal mode
+        config = DataFetchConfig.normal(
+            start="7d-ago",
+            end="now",
+            limit=limit,
+        )
+        logger.info("CDF SPARQL functions: normal mode (7d-ago to now)")
+
+    # Set global config for SPARQL functions to use
+    set_fetch_config(config)
 
     from ._indsl_wrappers import create_indsl_wrappers
     from ._sdk_wrappers import create_sdk_wrappers
@@ -145,6 +236,8 @@ def unregister_cdf_sparql_functions() -> None:
 
     from rdflib.plugins.sparql import CUSTOM_EVALS
 
+    from ._helpers import set_fetch_config
+
     # Get all function URIs that we registered
     sdk_functions = [
         "datapoints_aggregate",
@@ -176,6 +269,9 @@ def unregister_cdf_sparql_functions() -> None:
         uri_str = str(CDF_INDSL_NS[name])
         if uri_str in CUSTOM_EVALS:
             del CUSTOM_EVALS[uri_str]
+
+    # Clear global config
+    set_fetch_config(None)
 
     _REGISTERED = False
     logger.debug("CDF SPARQL functions unregistered")

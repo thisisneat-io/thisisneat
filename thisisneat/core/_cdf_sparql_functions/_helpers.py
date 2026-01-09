@@ -3,7 +3,7 @@ Utility functions for CDF SPARQL extensions.
 
 Provides helpers for:
 - Parsing instance_id (space + external_id) from URIs
-- Fetching time series datapoints
+- Fetching time series datapoints (normal, subscription, or backfill mode)
 - Caching and error handling
 """
 
@@ -12,6 +12,7 @@ from __future__ import annotations
 import logging
 import re
 from collections.abc import Callable
+from dataclasses import dataclass, field
 from functools import lru_cache, wraps
 from typing import TYPE_CHECKING, Any
 
@@ -38,6 +39,91 @@ URI_PATTERNS = [
     # Generic: extract space and external_id from last two path segments
     re.compile(r".*/([^/]+)/([^/]+)$"),
 ]
+
+
+@dataclass
+class DataFetchConfig:
+    """
+    Configuration for data fetching mode.
+
+    Supports three modes:
+    1. Normal mode (default): Fetch data with default time range
+    2. Subscription mode: Fetch from Data Point Subscription for incremental updates
+    3. Backfill mode: Fetch historic data with custom time range
+
+    Attributes:
+        mode: One of "normal", "subscription", or "backfill"
+        start: Start time for normal/backfill mode (default: "7d-ago")
+        end: End time for normal/backfill mode (default: "now")
+        limit: Max datapoints per time series (default: None = unlimited)
+        subscription_external_id: External ID of Data Point Subscription (subscription mode)
+        subscription_cursor: Cursor for subscription (subscription mode)
+        subscription_partitions: Number of partitions to read (subscription mode, default: 1)
+    """
+
+    mode: str = "normal"  # "normal", "subscription", or "backfill"
+    start: str = "7d-ago"
+    end: str = "now"
+    limit: int | None = None
+    subscription_external_id: str | None = None
+    subscription_cursor: str | None = None
+    subscription_partitions: int = 1
+    # Internal: stores new cursor after subscription fetch
+    _new_cursor: str | None = field(default=None, repr=False)
+    # Internal: cache of subscription data (external_id -> datapoints)
+    _subscription_data: dict[str, pd.Series] = field(default_factory=dict, repr=False)
+
+    def __post_init__(self):
+        if self.mode == "subscription" and not self.subscription_external_id:
+            raise ValueError("subscription_external_id required for subscription mode")
+
+    @classmethod
+    def normal(cls, start: str = "7d-ago", end: str = "now", limit: int | None = None) -> "DataFetchConfig":
+        """Create config for normal mode with time range."""
+        return cls(mode="normal", start=start, end=end, limit=limit)
+
+    @classmethod
+    def subscription(
+        cls,
+        external_id: str,
+        cursor: str | None = None,
+        partitions: int = 1,
+    ) -> "DataFetchConfig":
+        """Create config for subscription mode."""
+        return cls(
+            mode="subscription",
+            subscription_external_id=external_id,
+            subscription_cursor=cursor,
+            subscription_partitions=partitions,
+        )
+
+    @classmethod
+    def backfill(cls, start: str = "30d-ago", end: str = "now", limit: int | None = None) -> "DataFetchConfig":
+        """Create config for backfill mode with custom time range."""
+        return cls(mode="backfill", start=start, end=end, limit=limit)
+
+
+# Global config - set by register_cdf_sparql_functions
+_FETCH_CONFIG: DataFetchConfig | None = None
+
+
+def set_fetch_config(config: DataFetchConfig | None) -> None:
+    """Set the global data fetch configuration."""
+    global _FETCH_CONFIG
+    _FETCH_CONFIG = config
+    if config:
+        logger.info(f"Data fetch config set: mode={config.mode}")
+
+
+def get_fetch_config() -> DataFetchConfig:
+    """Get the current data fetch configuration (defaults to normal mode)."""
+    return _FETCH_CONFIG or DataFetchConfig.normal()
+
+
+def get_new_cursor() -> str | None:
+    """Get the new cursor after subscription fetch (if any)."""
+    config = get_fetch_config()
+    return config._new_cursor if config else None
 
 
 def parse_instance_id_from_uri(uri: URIRef | str) -> NodeId:
@@ -181,6 +267,88 @@ def get_timeseries_datapoints(
         return pd.Series(dtype=float)
 
 
+def fetch_subscription_data(
+    client: CogniteClient,
+    config: DataFetchConfig,
+) -> dict[str, pd.Series]:
+    """
+    Fetch datapoints from a Data Point Subscription.
+
+    Retrieves all changes since the cursor and caches them by external_id.
+    Updates config._new_cursor with the cursor for next iteration.
+
+    Args:
+        client: CogniteClient instance
+        config: DataFetchConfig with subscription settings
+
+    Returns:
+        Dict mapping external_id to pandas Series of datapoints
+    """
+    if config.mode != "subscription" or not config.subscription_external_id:
+        return {}
+
+    try:
+        logger.info(
+            f"Fetching from subscription '{config.subscription_external_id}' "
+            f"with cursor: {config.subscription_cursor[:20] if config.subscription_cursor else 'None'}..."
+        )
+
+        # Fetch subscription updates
+        result = client.time_series.subscriptions.iterate_data(
+            external_id=config.subscription_external_id,
+            cursor=config.subscription_cursor,
+            partitions=list(range(config.subscription_partitions)),
+        )
+
+        data_by_ts: dict[str, list[tuple[int, float]]] = {}
+        new_cursor = config.subscription_cursor
+
+        for batch in result:
+            # Update cursor from batch
+            if hasattr(batch, "cursor") and batch.cursor:
+                new_cursor = batch.cursor
+
+            # Process updates
+            if hasattr(batch, "updates"):
+                for update in batch.updates:
+                    # Get time series identifier
+                    ts_id = None
+                    if hasattr(update, "instance_id") and update.instance_id:
+                        ts_id = f"{update.instance_id.space}/{update.instance_id.external_id}"
+                    elif hasattr(update, "external_id") and update.external_id:
+                        ts_id = update.external_id
+
+                    if ts_id and hasattr(update, "upserts"):
+                        if ts_id not in data_by_ts:
+                            data_by_ts[ts_id] = []
+
+                        for dp in update.upserts:
+                            if hasattr(dp, "timestamp") and hasattr(dp, "value"):
+                                data_by_ts[ts_id].append((dp.timestamp, dp.value))
+
+        # Convert to pandas Series
+        result_data: dict[str, pd.Series] = {}
+        for ts_id, datapoints in data_by_ts.items():
+            if datapoints:
+                timestamps, values = zip(*sorted(datapoints), strict=True)
+                result_data[ts_id] = pd.Series(
+                    values,
+                    index=pd.to_datetime(timestamps, unit="ms"),
+                    dtype=float,
+                )
+
+        # Store new cursor
+        config._new_cursor = new_cursor
+        config._subscription_data = result_data
+
+        logger.info(f"Subscription fetch complete: {len(result_data)} time series with updates")
+        return result_data
+
+    except Exception as e:
+        logger.warning(f"Failed to fetch subscription data: {e}")
+        return {}
+
+
 def safe_sparql_wrapper(default_value: Any = None) -> Callable:
     """
     Decorator for safe SPARQL function execution with error handling.
@@ -217,28 +385,58 @@ def safe_sparql_wrapper(default_value: Any = None) -> Callable:
     return decorator
 
 
-def create_datapoints_fetcher(client: CogniteClient) -> Callable[[NodeId], pd.Series]:
+def create_datapoints_fetcher(
+    client: CogniteClient,
+    config: DataFetchConfig | None = None,
+) -> Callable[[NodeId], pd.Series]:
     """
-    Create a cached datapoints fetcher function.
+    Create a datapoints fetcher function that respects the current fetch mode.
 
-    Returns a function that retrieves datapoints for a given instance_id,
-    with LRU caching to avoid redundant API calls within a validation run.
+    In normal/backfill mode: Fetches from Time Series API with time range
+    In subscription mode: Returns data from pre-fetched subscription cache
 
     Args:
         client: CogniteClient instance
+        config: Optional DataFetchConfig (defaults to global config)
 
     Returns:
         Callable that takes NodeId and returns pandas Series
     """
+    fetch_config = config or get_fetch_config()
 
-    # Use a cache with reasonable size for validation runs
+    # If subscription mode, pre-fetch all subscription data
+    if fetch_config.mode == "subscription":
+        # Fetch subscription data if not already done
+        if not fetch_config._subscription_data:
+            fetch_subscription_data(client, fetch_config)
+
+        def fetch_from_subscription(instance_id: NodeId) -> pd.Series:
+            """Fetch from subscription cache."""
+            # Try both formats: space/external_id and just external_id
+            ts_id = f"{instance_id.space}/{instance_id.external_id}"
+            if ts_id in fetch_config._subscription_data:
+                return fetch_config._subscription_data[ts_id]
+            if instance_id.external_id in fetch_config._subscription_data:
+                return fetch_config._subscription_data[instance_id.external_id]
+            # No updates for this TS in subscription - return empty
+            logger.debug(f"No subscription updates for {instance_id}")
+            return pd.Series(dtype=float)
+
+        return fetch_from_subscription
+
+    # Normal or backfill mode: use cached API fetcher
     @lru_cache(maxsize=100)
     def _cached_fetch(space: str, external_id: str) -> pd.Series:
         from cognite.client.data_classes.data_modeling import NodeId
 
         instance_id = NodeId(space=space, external_id=external_id)
-        # Use 7 days and limit to 10000 datapoints for reasonable performance
-        return get_timeseries_datapoints(client, instance_id, start="7d-ago", end="now", limit=10000)
+        return get_timeseries_datapoints(
+            client,
+            instance_id,
+            start=fetch_config.start,
+            end=fetch_config.end,
+            limit=fetch_config.limit,
+        )
 
     def fetch(instance_id: NodeId) -> pd.Series:
         return _cached_fetch(instance_id.space, instance_id.external_id)
