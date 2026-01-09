@@ -101,7 +101,7 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
 
     # 1. Extreme Outliers Detection
     # Based on: https://indsl.docs.cognite.com/auto_examples/data_quality/plot_extreme_outlier.html
-    @safe_sparql_wrapper(default_value=Literal(False))
+    @safe_sparql_wrapper(default_value=Literal(0))
     def extreme_outliers_wrapper(
         timeseries_uri: str,
         alpha: float = 0.05,
@@ -119,7 +119,7 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
             poly_order: Polynomial order for curve fitting. Default 3
 
         Returns:
-            True if extreme outliers are detected, False otherwise
+            Number of outliers detected (integer)
         """
         timeseries_uri = literal_to_python(timeseries_uri)
         alpha = float(literal_to_python(alpha))
@@ -130,22 +130,22 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
         data = fetch_datapoints(instance_id)
 
         if data.empty or len(data) < 10:  # Need enough data for analysis
-            return Literal(False)
+            return Literal(0)
 
         try:
             filtered = extreme(data, alpha=alpha, bc_relaxation=bc_relaxation, poly_order=poly_order)
-            # If filtered data has fewer points, outliers were removed
-            has_outliers = len(filtered) < len(data)
-            return Literal(has_outliers)
+            # Count of removed outliers
+            outlier_count = len(data) - len(filtered)
+            return Literal(outlier_count)
         except Exception as e:
             logger.warning(f"extreme_outliers failed: {e}")
-            return Literal(False)
+            return Literal(0)
 
     wrappers["extreme_outliers"] = extreme_outliers_wrapper
 
     # 2. Value Decrease Check
     # Based on: https://indsl.docs.cognite.com/auto_examples/data_quality/plot_value_decrease_check.html
-    @safe_sparql_wrapper(default_value=Literal(False))
+    @safe_sparql_wrapper(default_value=Literal(0))
     def value_decrease_wrapper(
         timeseries_uri: str,
         threshold: float = 0.0,
@@ -161,7 +161,7 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
             threshold: Minimum decrease to flag (default: 0.0 = any decrease)
 
         Returns:
-            True if decreasing values are detected above threshold
+            Count of decreasing values detected (integer)
         """
         timeseries_uri = literal_to_python(timeseries_uri)
         threshold = float(literal_to_python(threshold))
@@ -169,22 +169,22 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
         data = fetch_datapoints(instance_id)
 
         if data.empty or len(data) < 2:
-            return Literal(False)
+            return Literal(0)
 
         try:
             indicator = value_decrease_check(data, threshold)
             # indicator is 1 where decrease detected, 0 otherwise
-            has_decreases = indicator.sum() > 0
-            return Literal(bool(has_decreases))
+            decrease_count = int(indicator.sum())
+            return Literal(decrease_count)
         except Exception as e:
             logger.warning(f"value_decrease_check failed: {e}")
-            return Literal(False)
+            return Literal(0)
 
     wrappers["value_decrease_check"] = value_decrease_wrapper
 
     # 3. Rolling Stddev of Time Delta
     # Based on: https://indsl.docs.cognite.com/auto_examples/data_quality/plot_rolling_stddev_timedelta.html
-    @safe_sparql_wrapper(default_value=Literal(False))
+    @safe_sparql_wrapper(default_value=Literal(0))
     def rolling_stddev_wrapper(
         timeseries_uri: str,
         time_window_minutes: int = 5,
@@ -202,7 +202,7 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
             max_stddev_seconds: Maximum allowed stddev in seconds (default: 60s)
 
         Returns:
-            True if stddev exceeds threshold anywhere in the series
+            Count of windows where stddev exceeds threshold (integer)
         """
         timeseries_uri = literal_to_python(timeseries_uri)
         time_window_minutes = int(literal_to_python(time_window_minutes))
@@ -212,24 +212,24 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
         data = fetch_datapoints(instance_id)
 
         if data.empty or len(data) < 3:
-            return Literal(False)
+            return Literal(0)
 
         try:
             time_window = pd.Timedelta(minutes=time_window_minutes)
             stddev_series = rolling_stddev_timedelta(data, time_window=time_window)
 
-            # Check if any stddev exceeds threshold
-            exceeds_threshold = (stddev_series > max_stddev_seconds).any()
-            return Literal(bool(exceeds_threshold))
+            # Count windows where stddev exceeds threshold
+            exceed_count = int((stddev_series > max_stddev_seconds).sum())
+            return Literal(exceed_count)
         except Exception as e:
             logger.warning(f"rolling_stddev_timedelta failed: {e}")
-            return Literal(False)
+            return Literal(0)
 
     wrappers["rolling_stddev_timedelta"] = rolling_stddev_wrapper
 
     # 4. Datapoint Diff Over Time Period
     # Based on: https://indsl.docs.cognite.com/auto_examples/data_quality/plot_datapoint_diff.html
-    @safe_sparql_wrapper(default_value=Literal(False))
+    @safe_sparql_wrapper(default_value=Literal(0))
     def datapoint_diff_wrapper(
         timeseries_uri: str,
         time_period_hours: int = 24,
@@ -249,7 +249,7 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
             tolerance_hours: Tolerance for time period matching (default: 1h)
 
         Returns:
-            True if threshold is breached anywhere in the series
+            Count of threshold breaches (integer)
         """
         timeseries_uri = literal_to_python(timeseries_uri)
         time_period_hours = int(literal_to_python(time_period_hours))
@@ -260,7 +260,7 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
         data = fetch_datapoints(instance_id)
 
         if data.empty or len(data) < 2:
-            return Literal(False)
+            return Literal(0)
 
         try:
             breach_indicator = datapoint_diff_over_time_period(
@@ -270,11 +270,11 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
                 pd.Timedelta(hours=tolerance_hours),
             )
 
-            has_breach = breach_indicator.sum() > 0
-            return Literal(bool(has_breach))
+            breach_count = int(breach_indicator.sum())
+            return Literal(breach_count)
         except Exception as e:
             logger.warning(f"datapoint_diff_over_time_period failed: {e}")
-            return Literal(False)
+            return Literal(0)
 
     wrappers["datapoint_diff"] = datapoint_diff_wrapper
 
@@ -283,7 +283,7 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
     try:
         from indsl.data_quality.gaps_identification import gaps_identification_z_scores
 
-        @safe_sparql_wrapper(default_value=Literal(False))
+        @safe_sparql_wrapper(default_value=Literal(0))
         def gaps_identification_wrapper(
             timeseries_uri: str,
             cutoff: float = 3.0,
@@ -299,7 +299,7 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
                 cutoff: Z-score cutoff for gap detection (default: 3.0)
 
             Returns:
-                True if gaps are detected, False otherwise
+                Count of gaps detected (integer)
             """
             timeseries_uri = literal_to_python(timeseries_uri)
             cutoff = float(literal_to_python(cutoff))
@@ -308,15 +308,15 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
             data = fetch_datapoints(instance_id)
 
             if data.empty or len(data) < 3:
-                return Literal(False)
+                return Literal(0)
 
             try:
                 gaps = gaps_identification_z_scores(data, cutoff=cutoff)
-                has_gaps = gaps.any() if hasattr(gaps, "any") else bool(gaps.sum() > 0)
-                return Literal(bool(has_gaps))
+                gap_count = int(gaps.sum()) if hasattr(gaps, "sum") else int(sum(gaps))
+                return Literal(gap_count)
             except Exception as e:
                 logger.warning(f"gaps_identification_z_scores failed: {e}")
-                return Literal(False)
+                return Literal(0)
 
         wrappers["gaps_identification"] = gaps_identification_wrapper
     except ImportError:
@@ -325,7 +325,7 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
     try:
         from indsl.data_quality.low_density_identification import low_density_identification_z_scores
 
-        @safe_sparql_wrapper(default_value=Literal(False))
+        @safe_sparql_wrapper(default_value=Literal(0))
         def low_density_wrapper(
             timeseries_uri: str,
             cutoff: float = 3.0,
@@ -340,7 +340,7 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
                 cutoff: Z-score cutoff for low density detection (default: 3.0)
 
             Returns:
-                True if low density periods are detected, False otherwise
+                Count of low density periods detected (integer)
             """
             timeseries_uri = literal_to_python(timeseries_uri)
             cutoff = float(literal_to_python(cutoff))
@@ -349,15 +349,15 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
             data = fetch_datapoints(instance_id)
 
             if data.empty or len(data) < 3:
-                return Literal(False)
+                return Literal(0)
 
             try:
                 low_density = low_density_identification_z_scores(data, cutoff=cutoff)
-                has_low_density = low_density.any() if hasattr(low_density, "any") else bool(low_density.sum() > 0)
-                return Literal(bool(has_low_density))
+                low_density_count = int(low_density.sum()) if hasattr(low_density, "sum") else int(sum(low_density))
+                return Literal(low_density_count)
             except Exception as e:
                 logger.warning(f"low_density_identification_z_scores failed: {e}")
-                return Literal(False)
+                return Literal(0)
 
         wrappers["low_density"] = low_density_wrapper
     except ImportError:
@@ -366,7 +366,7 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
     try:
         from indsl.data_quality.out_of_range import out_of_range_iqr
 
-        @safe_sparql_wrapper(default_value=Literal(False))
+        @safe_sparql_wrapper(default_value=Literal(0))
         def out_of_range_wrapper(
             timeseries_uri: str,
             min_value: float | None = None,
@@ -383,7 +383,7 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
                 max_value: Maximum expected value (optional)
 
             Returns:
-                True if out of range values are detected, False otherwise
+                Count of out of range values detected (integer)
             """
             timeseries_uri = literal_to_python(timeseries_uri)
 
@@ -391,15 +391,15 @@ def create_indsl_wrappers(client: CogniteClient) -> dict[str, Callable]:
             data = fetch_datapoints(instance_id)
 
             if data.empty or len(data) < 3:
-                return Literal(False)
+                return Literal(0)
 
             try:
                 outliers = out_of_range_iqr(data)
-                has_outliers = outliers.any() if hasattr(outliers, "any") else bool(outliers.sum() > 0)
-                return Literal(bool(has_outliers))
+                outlier_count = int(outliers.sum()) if hasattr(outliers, "sum") else int(sum(outliers))
+                return Literal(outlier_count)
             except Exception as e:
                 logger.warning(f"out_of_range_iqr failed: {e}")
-                return Literal(False)
+                return Literal(0)
 
         wrappers["out_of_range"] = out_of_range_wrapper
     except ImportError:
