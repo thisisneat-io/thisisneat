@@ -11,7 +11,7 @@ Reference:
 """
 
 import logging
-from typing import Any
+from typing import Any, Iterator
 
 from cognite.client import data_modeling as dm
 from rdflib import Graph, Namespace
@@ -27,6 +27,48 @@ from ._state import SessionState
 from .exceptions import NeatSessionError, session_class_wrapper
 
 logger = logging.getLogger(__name__)
+
+
+class SHACLValidationResult:
+    """Result from SHACL validation. Backwards compatible - unpacks as 3 values.
+    
+    Can be used as:
+        # Old style (3 values) - BACKWARDS COMPATIBLE
+        conforms, report_graph, report_text = result
+        
+        # Access new cursor via attribute
+        new_cursor = result.new_cursor
+        
+        # Named attributes
+        result.conforms
+        result.report_graph
+        result.report_text
+        result.new_cursor
+    """
+    
+    def __init__(
+        self,
+        conforms: bool,
+        report_graph: str,
+        report_text: str,
+        new_cursor: str | None = None,
+    ):
+        self.conforms = conforms
+        self.report_graph = report_graph
+        self.report_text = report_text
+        self.new_cursor = new_cursor
+    
+    def __iter__(self) -> Iterator:
+        """Allow unpacking as 3-tuple for backwards compatibility."""
+        return iter((self.conforms, self.report_graph, self.report_text))
+    
+    def __len__(self) -> int:
+        """Support len() - returns 3 for backwards compatible unpacking."""
+        return 3
+    
+    def __getitem__(self, index: int) -> Any:
+        """Support indexing (0-2 for tuple, new_cursor via attribute)."""
+        return (self.conforms, self.report_graph, self.report_text)[index]
 
 
 @session_class_wrapper
@@ -53,7 +95,7 @@ class ValidateInstancesAPI:
         subscription_partitions: int = 1,
         backfill_start: str | None = None,
         backfill_end: str | None = None,
-    ) -> tuple[bool, str, str, str | None]:
+    ) -> SHACLValidationResult:
         """
         Validate instances with SHACL rules, automatically loading referenced instances.
 
@@ -90,7 +132,9 @@ class ValidateInstancesAPI:
             backfill_end: End time for backfill mode (e.g., "now")
 
         Returns:
-            Tuple of (conforms, report_graph, report_text, new_cursor)
+            SHACLValidationResult - backwards compatible, unpacks as 3 values:
+                conforms, report_graph, report_text = result
+                new_cursor = result.new_cursor  # Access cursor via attribute
             - conforms: True if all instances pass validation
             - report_graph: SHACL validation report as Turtle string
             - report_text: Human-readable validation report
@@ -271,12 +315,8 @@ class ValidateInstancesAPI:
         if verbose and new_cursor:
             print(f"  New subscription cursor available (length: {len(new_cursor)})")
 
-        return (
-            conforms,
-            report_graph.decode("utf-8") if isinstance(report_graph, bytes) else report_graph,
-            report_text,
-            new_cursor,
-        )
+        report_str = report_graph.decode("utf-8") if isinstance(report_graph, bytes) else report_graph
+        return SHACLValidationResult(conforms, report_str, report_text, new_cursor)
 
     def _analyze_shacl_references(self, shacl_graph: Graph, verbose: bool = False) -> dict[str, list[dict]]:
         """
