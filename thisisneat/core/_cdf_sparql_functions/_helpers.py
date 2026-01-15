@@ -208,6 +208,50 @@ def verify_timeseries_exists(
         return False
 
 
+def _parse_time_to_sdk_format(time_value: str | int) -> str | int | datetime:
+    """
+    Parse time value to a format the CDF SDK accepts.
+    
+    SDK accepts:
+    - Relative strings: "30d-ago", "7d-ago", "now"
+    - Integer milliseconds: 1736848800000
+    - datetime objects
+    
+    NOT accepted:
+    - ISO strings: "2026-01-15T10:00:00+00:00"
+    - String milliseconds: "1736848800000"
+    """
+    from datetime import datetime, timezone
+    
+    if isinstance(time_value, int):
+        return time_value
+    
+    if isinstance(time_value, str):
+        # Check if it's a numeric string (milliseconds timestamp)
+        if time_value.isdigit() or (time_value.startswith("-") and time_value[1:].isdigit()):
+            return int(time_value)
+        
+        # Check if it's a relative time string (SDK native format)
+        if time_value == "now" or time_value.endswith("-ago") or time_value.endswith("-ahead"):
+            return time_value
+        
+        # Try to parse as ISO string
+        try:
+            # Try with timezone
+            if "+" in time_value or time_value.endswith("Z"):
+                dt = datetime.fromisoformat(time_value.replace("Z", "+00:00"))
+            else:
+                # Assume UTC if no timezone
+                dt = datetime.fromisoformat(time_value).replace(tzinfo=timezone.utc)
+            # Convert to milliseconds for SDK
+            return int(dt.timestamp() * 1000)
+        except ValueError:
+            pass
+    
+    # Return as-is and let SDK handle/error
+    return time_value
+
+
 def get_timeseries_datapoints(
     client: CogniteClient,
     instance_id: NodeId,
@@ -225,7 +269,8 @@ def get_timeseries_datapoints(
     Args:
         client: CogniteClient instance
         instance_id: NodeId with space and external_id
-        start: Start time (default: 30 days ago)
+        start: Start time (default: 30 days ago). Accepts relative ("7d-ago"), 
+               ISO strings ("2026-01-15T10:00:00+00:00"), or milliseconds
         end: End time (default: now)
         limit: Maximum number of datapoints to retrieve
         verify_exists: If True, verify time series exists before fetching (default: False)
@@ -247,10 +292,14 @@ def get_timeseries_datapoints(
             logger.debug(f"Time series {instance_id} does not exist")
             return pd.Series(dtype=float)
 
+        # Parse time parameters to SDK-compatible format
+        start_parsed = _parse_time_to_sdk_format(start)
+        end_parsed = _parse_time_to_sdk_format(end)
+
         result = client.time_series.data.retrieve(
             instance_id=instance_id,
-            start=start,
-            end=end,
+            start=start_parsed,
+            end=end_parsed,
             limit=limit,
         )
 

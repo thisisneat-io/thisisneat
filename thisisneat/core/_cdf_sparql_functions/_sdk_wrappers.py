@@ -30,6 +30,25 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def _parse_time_param(value: str | int) -> str | int:
+    """
+    Parse time parameter, converting millisecond timestamp strings to integers.
+    
+    The CDF SDK accepts:
+    - Relative strings: "30d-ago", "7d-ago", "now"
+    - Integer milliseconds: 1736848800000
+    
+    But NOT string milliseconds: "1736848800000"
+    
+    This function converts numeric strings to integers for SDK compatibility.
+    """
+    if isinstance(value, str):
+        # Check if it's a numeric string (milliseconds timestamp)
+        if value.isdigit() or (value.startswith("-") and value[1:].isdigit()):
+            return int(value)
+    return value
+
+
 def create_sdk_wrappers(client: CogniteClient) -> dict[str, Callable]:
     """
     Create CDF SDK wrapper functions for SPARQL registration.
@@ -80,8 +99,8 @@ def create_sdk_wrappers(client: CogniteClient) -> dict[str, Callable]:
         timeseries_uri = literal_to_python(timeseries_uri)
         aggregate = literal_to_python(aggregate)
         granularity = literal_to_python(granularity)
-        start = literal_to_python(start)
-        end = literal_to_python(end)
+        start = _parse_time_param(literal_to_python(start))
+        end = _parse_time_param(literal_to_python(end))
 
         instance_id = parse_instance_id_from_uri(timeseries_uri)
 
@@ -127,16 +146,23 @@ def create_sdk_wrappers(client: CogniteClient) -> dict[str, Callable]:
             Total number of datapoints as Literal
         """
         timeseries_uri = literal_to_python(timeseries_uri)
-        start = literal_to_python(start)
-        end = literal_to_python(end)
+        start = _parse_time_param(literal_to_python(start))
+        end = _parse_time_param(literal_to_python(end))
 
         instance_id = parse_instance_id_from_uri(timeseries_uri)
 
-        # Use SDK aggregation with count - use largest granularity for efficiency
+        # Use SDK aggregation with count - use appropriate granularity based on time range
+        # For short ranges (< 1 day), use hourly granularity
+        granularity = "1h"
+        if isinstance(start, int) and isinstance(end, int):
+            range_ms = end - start
+            if range_ms > 86400000:  # More than 1 day
+                granularity = "1d"
+        
         result = client.time_series.data.retrieve(
             instance_id=instance_id,
             aggregates=["count"],
-            granularity="1d",  # Daily buckets
+            granularity=granularity,
             start=start,
             end=end,
         )
@@ -223,16 +249,23 @@ def create_sdk_wrappers(client: CogniteClient) -> dict[str, Callable]:
             Weighted average value as Literal
         """
         timeseries_uri = literal_to_python(timeseries_uri)
-        start = literal_to_python(start)
-        end = literal_to_python(end)
+        start = _parse_time_param(literal_to_python(start))
+        end = _parse_time_param(literal_to_python(end))
 
         instance_id = parse_instance_id_from_uri(timeseries_uri)
 
         # Use SDK aggregation with both average and count to compute weighted average
+        # Use appropriate granularity based on time range
+        granularity = "1h"
+        if isinstance(start, int) and isinstance(end, int):
+            range_ms = end - start
+            if range_ms > 86400000:  # More than 1 day
+                granularity = "1d"
+        
         result = client.time_series.data.retrieve(
             instance_id=instance_id,
             aggregates=["average", "count"],
-            granularity="1d",
+            granularity=granularity,
             start=start,
             end=end,
         )
@@ -274,16 +307,22 @@ def create_sdk_wrappers(client: CogniteClient) -> dict[str, Callable]:
             Minimum value as Literal
         """
         timeseries_uri = literal_to_python(timeseries_uri)
-        start = literal_to_python(start)
-        end = literal_to_python(end)
+        start = _parse_time_param(literal_to_python(start))
+        end = _parse_time_param(literal_to_python(end))
 
         instance_id = parse_instance_id_from_uri(timeseries_uri)
 
-        # Use SDK aggregation with min
+        # Use SDK aggregation with min - use appropriate granularity based on time range
+        granularity = "1h"
+        if isinstance(start, int) and isinstance(end, int):
+            range_ms = end - start
+            if range_ms > 86400000:  # More than 1 day
+                granularity = "1d"
+        
         result = client.time_series.data.retrieve(
             instance_id=instance_id,
             aggregates=["min"],
-            granularity="1d",
+            granularity=granularity,
             start=start,
             end=end,
         )
@@ -324,16 +363,22 @@ def create_sdk_wrappers(client: CogniteClient) -> dict[str, Callable]:
             Maximum value as Literal
         """
         timeseries_uri = literal_to_python(timeseries_uri)
-        start = literal_to_python(start)
-        end = literal_to_python(end)
+        start = _parse_time_param(literal_to_python(start))
+        end = _parse_time_param(literal_to_python(end))
 
         instance_id = parse_instance_id_from_uri(timeseries_uri)
 
-        # Use SDK aggregation with max
+        # Use SDK aggregation with max - use appropriate granularity based on time range
+        granularity = "1h"
+        if isinstance(start, int) and isinstance(end, int):
+            range_ms = end - start
+            if range_ms > 86400000:  # More than 1 day
+                granularity = "1d"
+        
         result = client.time_series.data.retrieve(
             instance_id=instance_id,
             aggregates=["max"],
-            granularity="1d",
+            granularity=granularity,
             start=start,
             end=end,
         )

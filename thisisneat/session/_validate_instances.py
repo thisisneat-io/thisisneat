@@ -282,6 +282,7 @@ class ValidateInstancesAPI:
             subscription_partitions=subscription_partitions,
             backfill_start=backfill_start,
             backfill_end=backfill_end,
+            force=True,  # Always re-register to ensure fresh state with new time window
         )
 
         if verbose:
