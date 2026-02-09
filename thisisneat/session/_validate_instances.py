@@ -468,7 +468,7 @@ class ValidateInstancesAPI:
         loaded_ids = {inst.get("externalId") for inst in instances}
 
         # Cache of view -> property mappings
-        view_property_cache: dict[str, dict[str, dm.ViewId]] = {}
+        view_property_cache: dict[str, tuple[dict[str, dm.ViewId], dict[str, tuple[dm.ViewId, str]]]] = {}
 
         # Current instances to scan for references
         current_instances = list(instances)
@@ -479,8 +479,15 @@ class ValidateInstancesAPI:
 
             # Collect all references from current instances
             to_load: dict[tuple[str, str], dict] = {}
+            # Collect reverse relation queries: {(view_id, through_property, prop_name): (property_name, [target_instance_ids])}
+            reverse_queries: dict[tuple[dm.ViewId, str, str], tuple[str, list[tuple[str, str]]]] = {}
+            # Track reverse relation triples to add: [(source_instance, property_name, target_instance)]
+            reverse_relation_triples: list[tuple[tuple[str, str], str, tuple[str, str]]] = []
 
             for instance in current_instances:
+                instance_space = instance.get("space", datamodel_space)
+                instance_ext_id = instance.get("externalId")
+                
                 properties = instance.get("properties", {})
                 for space_key, views in properties.items():
                     for view_version, props in views.items():
@@ -490,8 +497,9 @@ class ValidateInstancesAPI:
                             view_property_cache[cache_key] = self._get_view_property_mappings(
                                 client, space_key, view_version, verbose
                             )
-                        prop_to_view = view_property_cache[cache_key]
+                        prop_to_view, reverse_relations = view_property_cache[cache_key]
 
+                        # Collect forward relations
                         for prop_name, prop_value in props.items():
                             # Check if this property has references
                             if isinstance(prop_value, dict) and "externalId" in prop_value:
@@ -518,6 +526,99 @@ class ValidateInstancesAPI:
                                                 "target_view": prop_to_view.get(prop_name),
                                                 "source_instance": instance.get("externalId"),
                                             }
+                        
+                        # Collect reverse relation queries
+                        for rev_prop_name, (source_view, through_prop) in reverse_relations.items():
+                            if verbose:
+                                print(f"        Collecting reverse query for {rev_prop_name}: {source_view.external_id}.{through_prop}")
+                            query_key = (source_view, through_prop, rev_prop_name)  # Include prop name in key
+                            if query_key not in reverse_queries:
+                                reverse_queries[query_key] = (rev_prop_name, [])
+                            # Unpack, append, repack (tuples are immutable)
+                            prop_name, instance_list = reverse_queries[query_key]
+                            instance_list.append((instance_space, instance_ext_id))
+                            reverse_queries[query_key] = (prop_name, instance_list)
+            
+            # Query for reverse relation instances
+            if reverse_queries and verbose:
+                print(f"    Querying {len(reverse_queries)} reverse relation types")
+            
+            for (source_view, through_prop, _), (rev_prop_name, target_instances) in reverse_queries.items():
+                if verbose:
+                    print(f"      Reverse: {source_view.external_id}.{through_prop} -> {len(target_instances)} instances")
+                
+                try:
+                    # Build filter to find instances that reference any of our target instances
+                    # Filter: source_view instances where through_prop points to any of target_instances
+                    from cognite.client.data_classes import filters as dms_filters
+                    
+                    # Create OR filter for all target instances
+                    or_filters = []
+                    for target_space, target_ext_id in target_instances:
+                        or_filters.append(
+                            dms_filters.Equals(
+                                [source_view.space, source_view.external_id, through_prop],
+                                {"space": target_space, "externalId": target_ext_id}
+                            )
+                        )
+                    
+                    # Combine with OR if multiple targets
+                    if len(or_filters) == 1:
+                        filter_expr = or_filters[0]
+                    else:
+                        filter_expr = dms_filters.Or(*or_filters)
+                    
+                    # Query instances
+                    result = client.data_modeling.instances.list(
+                        instance_type="node",
+                        sources=[source_view],
+                        filter=filter_expr,
+                        limit=-1  # Get all matching
+                    )
+                    
+                    # Add to to_load and track reverse triples  
+                    # Each loaded instance connects back to ALL the target instances we queried for
+                    for node in result.data:
+                        node_space = node.space
+                        node_ext_id = node.external_id
+                        
+                        # Check which target instance(s) this node points to via through_prop
+                        node_dict = node.dump(camel_case=True)
+                        node_props = node_dict.get("properties", {})
+                        for prop_space, views in node_props.items():
+                            for view_key, props in views.items():
+                                through_value = props.get(through_prop)
+                                if through_value:
+                                    # Handle single value or list
+                                    targets_to_check = [through_value] if not isinstance(through_value, list) else through_value
+                                    for target_val in targets_to_check:
+                                        if isinstance(target_val, dict) and "externalId" in target_val:
+                                            target_space = target_val.get("space", datamodel_space)
+                                            target_ext_id = target_val["externalId"]
+                                            # Check if this target is one we're collecting for
+                                            if (target_space, target_ext_id) in target_instances:
+                                                # Record reverse relation triple with correct property name
+                                                reverse_relation_triples.append((
+                                                    (target_space, target_ext_id),  # Original instance
+                                                    rev_prop_name,  # Property name (e.g., "mcPackagesRel")
+                                                    (node_space, node_ext_id)  # Reverse instance
+                                                ))
+                        
+                        if node_ext_id not in loaded_ids:
+                            to_load[(node_space, node_ext_id)] = {
+                                "space": node_space,
+                                "externalId": node_ext_id,
+                                "property": through_prop,
+                                "target_view": source_view,
+                                "source_instance": "reverse_relation",
+                            }
+                    
+                    if verbose and len(result.data) > 0:
+                        print(f"        Found {len(result.data)} instances")
+                        
+                except Exception as e:
+                    if verbose:
+                        print(f"        Warning: Could not query reverse relation: {e}")
 
             if not to_load:
                 if verbose:
@@ -539,6 +640,47 @@ class ValidateInstancesAPI:
             newly_loaded = self._load_instances_by_view(
                 client, to_load, data_graph, namespace, datamodel_space, loaded_ids, verbose
             )
+            
+            # Add reverse relation triples to the graph
+            if reverse_relation_triples:
+                if verbose:
+                    print(f"    Adding {len(reverse_relation_triples)} reverse relation triples to graph")
+                from rdflib import URIRef
+                # Need to map (source_space, source_ext_id) to their view to get correct predicate namespace
+                # Track which view each source instance belongs to
+                instance_to_view: dict[tuple[str, str], tuple[str, str]] = {}
+                for inst in instances + current_instances:
+                    inst_space = inst.get("space", datamodel_space)
+                    inst_ext_id = inst.get("externalId")
+                    # Get the view from properties
+                    props = inst.get("properties", {})
+                    for view_space, views in props.items():
+                        for view_version, _ in views.items():
+                            view_name = view_version.split("/")[0] if "/" in view_version else view_version
+                            instance_to_view[(inst_space, inst_ext_id)] = (view_space, view_name)
+                            break  # Use first view found
+                        break
+                
+                for (source_space, source_ext_id), prop_name, (target_space, target_ext_id) in reverse_relation_triples:
+                    # Create URIs for source and target
+                    source_ns = Namespace(f"http://purl.org/cognite/{source_space}/")
+                    target_ns = Namespace(f"http://purl.org/cognite/{target_space}/")
+                    source_uri = source_ns[source_ext_id]
+                    target_uri = target_ns[target_ext_id]
+                    
+                    # Create predicate URI using the source instance's view namespace
+                    view_space, view_name = instance_to_view.get((source_space, source_ext_id), (datamodel_space, "UnknownView"))
+                    pred_ns = Namespace(f"http://purl.org/cognite/{view_space}/{view_name}/")
+                    predicate_uri = pred_ns[prop_name]
+                    
+                    # Add triple to graph
+                    data_graph.add((source_uri, predicate_uri, target_uri))
+                    
+                    if verbose:
+                        print(f"      {source_ext_id}.{prop_name} -> {target_ext_id}")
+                        print(f"        Subject: {source_uri}")
+                        print(f"        Predicate: {predicate_uri}")
+                        print(f"        Object: {target_uri}")
 
             total_loaded += len(newly_loaded)
             current_instances = newly_loaded
@@ -550,9 +692,17 @@ class ValidateInstancesAPI:
 
     def _get_view_property_mappings(
         self, client: NeatClient, space: str, view_version: str, verbose: bool = False
-    ) -> dict[str, dm.ViewId]:
-        """Get property -> target view mappings for a view."""
+    ) -> tuple[dict[str, dm.ViewId], dict[str, tuple[dm.ViewId, str]]]:
+        """
+        Get property -> target view mappings for a view.
+        
+        Returns:
+            Tuple of (forward_mappings, reverse_mappings) where:
+            - forward_mappings: dict[property_name, target_view_id]
+            - reverse_mappings: dict[property_name, (source_view_id, through_property)]
+        """
         property_to_target_view: dict[str, dm.ViewId] = {}
+        reverse_relations: dict[str, tuple[dm.ViewId, str]] = {}
 
         try:
             # Parse view_version (e.g., "YourOrgAsset/v1")
@@ -571,7 +721,13 @@ class ValidateInstancesAPI:
             if full_view:
                 for v in full_view:
                     for prop_name, prop_def in v.properties.items():
-                        if hasattr(prop_def, "source") and prop_def.source:
+                        # Reverse direct relations (check FIRST before generic source check)
+                        if isinstance(prop_def, dm.MultiReverseDirectRelation):
+                            reverse_relations[prop_name] = (prop_def.source, prop_def.through.property)
+                            if verbose:
+                                print(f"        {prop_name} <- {prop_def.source.external_id}/{prop_def.source.version} (through {prop_def.through.property})")
+                        # Forward direct relations
+                        elif hasattr(prop_def, "source") and prop_def.source:
                             property_to_target_view[prop_name] = prop_def.source
                             if verbose:
                                 print(f"        {prop_name} -> {prop_def.source.external_id}/{prop_def.source.version}")
@@ -579,7 +735,7 @@ class ValidateInstancesAPI:
             if verbose:
                 print(f"      Warning: Could not fetch view {space}/{view_version}: {e}")
 
-        return property_to_target_view
+        return property_to_target_view, reverse_relations
 
     def _load_instances_by_view(
         self,
