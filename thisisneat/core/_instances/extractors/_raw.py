@@ -26,6 +26,11 @@ class RAWExtractor(BaseExtractor):
         empty_values: Set[str] = DEFAULT_EMPTY_VALUES,
         str_to_ideal_type: bool = False,
         unpack_json: bool = False,
+        # Processing modes (mutually exclusive per CDF API)
+        cursor: str | None = None,
+        min_last_updated_time: int | None = None,
+        max_last_updated_time: int | None = None,
+        limit: int | None = None,
     ) -> None:
         self.client = client
         self.db_name = db_name
@@ -36,19 +41,95 @@ class RAWExtractor(BaseExtractor):
         self.empty_values = empty_values
         self.str_to_ideal_type = str_to_ideal_type
         self.unpack_json = unpack_json
+        self.cursor = cursor
+        self.min_last_updated_time = min_last_updated_time
+        self.max_last_updated_time = max_last_updated_time
+        self.limit = limit
 
     @property
     def _rdf_type(self) -> URIRef:
         return self.namespace[urllib.parse.quote(self.table_type or self.table_name)]
 
     def extract(self) -> Iterable[Triple]:
-        for row in self.client.raw.rows(self.db_name, self.table_name, partitions=10, chunk_size=None):
+        """
+        Extract rows using either cursor (historic) or timestamp (incremental) mode.
+
+        Cursor mode: Used for partitioned historic processing (getCursors API)
+        Timestamp mode: Used for incremental processing (minLastUpdatedTime parameter)
+
+        Note: cursor and timestamp modes are mutually exclusive per CDF API.
+        When cursor is specified, timestamp parameters are ignored.
+        """
+        if self.cursor or self.min_last_updated_time or self.max_last_updated_time or self.limit:
+            # Use new filtering mode (cursor or timestamp)
+            rows = self._fetch_filtered_rows()
+        else:
+            # Legacy mode: use existing partitioned fetch
+            rows = self.client.raw.rows(self.db_name, self.table_name, partitions=10, chunk_size=None)
+
+        for row in rows:
             if isinstance(row, Row):
                 yield from self._row2triples(row)
             elif isinstance(row, RowList):
                 # Bug in SDK returning row list with chunk_size= None
                 for item in row:
                     yield from self._row2triples(item)
+
+    def _fetch_filtered_rows(self) -> Iterable[Row | RowList]:
+        """
+        Fetch rows with cursor or timestamp filtering using REST API.
+
+        SDK's raw.rows.list() doesn't expose cursor parameter, so we use REST API directly.
+        Handles pagination by following nextCursor until all rows are fetched.
+
+        API endpoints:
+        - GET /api/v1/projects/{project}/raw/dbs/{db}/tables/{table}/rows
+        """
+        url_path = f"/api/v1/projects/{self.client._config.project}/raw/dbs/{self.db_name}/tables/{self.table_name}/rows"
+
+        # Initial parameters
+        params = {}
+        if self.cursor:
+            # Cursor mode: Historic/partitioned processing
+            # Note: timestamp params are ignored when cursor is specified (per CDF API docs)
+            params["cursor"] = self.cursor
+        else:
+            # Timestamp mode: Incremental processing
+            if self.min_last_updated_time:
+                params["minLastUpdatedTime"] = self.min_last_updated_time
+            if self.max_last_updated_time:
+                params["maxLastUpdatedTime"] = self.max_last_updated_time
+
+        if self.limit:
+            params["limit"] = self.limit
+
+        # Paginate through results using nextCursor
+        rows_fetched = 0
+        while True:
+            # Use client's GET method (similar to how SDK makes API calls internally)
+            res = self.client._get(url_path, params=params)
+
+            # Convert API response to Row objects and yield them
+            items = res.get("items", [])
+            for row_data in items:
+                # Check limit if specified
+                if self.limit and rows_fetched >= self.limit:
+                    return
+
+                yield Row(
+                    key=row_data["key"],
+                    columns=row_data["columns"],
+                    last_updated_time=row_data.get("lastUpdatedTime"),
+                )
+                rows_fetched += 1
+
+            # Check for next page
+            next_cursor = res.get("nextCursor")
+            if not next_cursor:
+                break
+
+            # Update cursor for next iteration
+            params["cursor"] = next_cursor
 
     def _row2triples(self, row: Row) -> Iterable[Triple]:
         # The row is always set. It is just the PySDK that have it as str | None

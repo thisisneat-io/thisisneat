@@ -23,6 +23,7 @@ from thisisneat.core._cdf_sparql_functions import (
     register_cdf_sparql_functions,
 )
 from thisisneat.core._client import NeatClient
+from thisisneat.core._instances.extractors._raw import RAWExtractor
 
 from ._state import SessionState
 from .exceptions import NeatSessionError, session_class_wrapper
@@ -327,6 +328,228 @@ class ValidateInstancesAPI:
 
         report_str = report_graph.decode("utf-8") if isinstance(report_graph, bytes) else report_graph
         return SHACLValidationResult(conforms, report_str, report_text, new_cursor)
+
+    def with_shacl_raw(
+        self,
+        db_name: str,
+        table_name: str,
+        shacl_rules: str,
+        table_type: str | None = None,
+        foreign_keys: list[str] | None = None,
+        verbose: bool = True,
+        # Processing modes (mutually exclusive per CDF API)
+        cursor: str | None = None,
+        min_last_updated_time: int | None = None,
+        max_last_updated_time: int | None = None,
+        limit: int | None = None,
+        # Advanced options
+        unpack_json: bool = False,
+        str_to_ideal_type: bool = False,
+    ) -> SHACLValidationResult:
+        """
+        Validate RAW table rows against SHACL rules.
+
+        This method converts RAW table rows to RDF triples and validates them using SHACL.
+        Supports two processing modes:
+        - **Cursor mode**: For partitioned historic processing (getCursors API)
+        - **Timestamp mode**: For incremental validation (minLastUpdatedTime parameter)
+
+        Note: Cursor and timestamp modes are mutually exclusive per CDF API.
+        When cursor is specified, timestamp parameters are ignored.
+
+        Args:
+            db_name: RAW database name
+            table_name: RAW table name
+            shacl_rules: SHACL rules as Turtle string
+            table_type: Custom type URI suffix (defaults to table_name)
+            foreign_keys: Column names that represent foreign keys to other RAW rows
+            verbose: Print progress messages (default: True)
+            cursor: Cursor for partitioned historic processing (from getCursors API)
+            min_last_updated_time: Only validate rows updated after this timestamp in milliseconds (incremental mode)
+            max_last_updated_time: Only validate rows updated before this timestamp in milliseconds (incremental mode)
+            limit: Maximum rows to validate
+            unpack_json: Parse JSON strings in columns (default: False)
+            str_to_ideal_type: Convert string values to appropriate types (default: False)
+
+        Returns:
+            SHACLValidationResult - backwards compatible, unpacks as 3 values:
+                conforms, report_graph, report_text = result
+            - conforms: True if all rows pass validation
+            - report_graph: SHACL validation report as Turtle string
+            - report_text: Human-readable validation report
+
+        Example:
+            # Incremental mode (validate rows updated since last run)
+            result = neat.validate_instances.with_shacl_raw(
+                db_name="iot",
+                table_name="sensors",
+                shacl_rules=shacl_rules_turtle,
+                min_last_updated_time=last_timestamp,
+                limit=10000,
+            )
+
+            # Historic/cursor mode (validate partition of historic data)
+            result = neat.validate_instances.with_shacl_raw(
+                db_name="iot",
+                table_name="sensors",
+                shacl_rules=shacl_rules_turtle,
+                cursor=cursor_from_getCursors_api,
+            )
+        """
+        if not self._state.client:
+            raise NeatSessionError("Cannot validate RAW: no CogniteClient configured")
+
+        # 1. Extract RAW rows to RDF graph
+        if verbose:
+            mode = "cursor" if cursor else "timestamp" if min_last_updated_time else "full"
+            print(f"  Extracting RAW rows from {db_name}.{table_name} (mode: {mode})...")
+
+        extractor = RAWExtractor(
+            client=self._state.client,
+            db_name=db_name,
+            table_name=table_name,
+            table_type=table_type,
+            foreign_keys=foreign_keys,
+            cursor=cursor,
+            min_last_updated_time=min_last_updated_time,
+            max_last_updated_time=max_last_updated_time,
+            limit=limit,
+            unpack_json=unpack_json,
+            str_to_ideal_type=str_to_ideal_type,
+        )
+
+        data_graph = Graph()
+        row_count = 0
+        for triple in extractor.extract():
+            data_graph.add(triple)
+            row_count += 1
+
+        if verbose:
+            print(f"  Loaded {len(data_graph)} triples from {row_count} rows")
+
+        # 2. Parse SHACL rules
+        if verbose:
+            print("  Parsing SHACL rules...")
+
+        shacl_graph = Graph()
+        shacl_graph.parse(data=shacl_rules, format="turtle")
+
+        # 3. Validate with pyshacl
+        if verbose:
+            print("  Running SHACL validation...")
+
+        import pyshacl
+
+        conforms, report_graph, report_text = pyshacl.validate(
+            data_graph=data_graph,
+            shacl_graph=shacl_graph,
+            inference="none",
+            abort_on_first=False,
+            debug=False,
+        )
+
+        if verbose:
+            print(f"  Validation {'PASSED' if conforms else 'FAILED'}")
+
+        report_str = report_graph.decode("utf-8") if isinstance(report_graph, bytes) else report_graph
+        return SHACLValidationResult(conforms, report_str, report_text)
+
+    def generate_shacl_template_for_raw(
+        self,
+        db_name: str,
+        table_name: str,
+        sample_size: int = 1000,
+        required_columns: list[str] | None = None,
+        verbose: bool = True,
+    ) -> str:
+        """
+        Generate SHACL template by analyzing RAW table schema.
+
+        Samples first N rows to discover:
+        - Column names (all columns found in sample)
+        - Column types (inferred from values)
+        - Required columns (specified or inferred from presence)
+
+        This provides a starting point for SHACL rules that can be customized with
+        additional constraints like value ranges, patterns, or cross-column validations.
+
+        Args:
+            db_name: RAW database name
+            table_name: RAW table name
+            sample_size: Number of rows to analyze for schema discovery (default: 1000)
+            required_columns: Columns that must be present (if None, all found columns are optional)
+            verbose: Print progress messages (default: True)
+
+        Returns:
+            SHACL rules as Turtle string with column presence/type constraints
+
+        Example:
+            neat = NeatSession(client)
+            shacl_template = neat.validate_instances.generate_shacl_template_for_raw(
+                db_name="iot",
+                table_name="sensors",
+                sample_size=1000,
+                required_columns=["device_id", "timestamp"],
+                verbose=True,
+            )
+
+            # Save to file for editing
+            with open("iot_sensors_shacl_template.ttl", "w") as f:
+                f.write(shacl_template)
+        """
+        if not self._state.client:
+            raise NeatSessionError("Cannot generate SHACL template: no CogniteClient configured")
+
+        # 1. Fetch sample rows
+        if verbose:
+            print(f"  Fetching {sample_size} sample rows from {db_name}.{table_name}...")
+
+        try:
+            rows = list(self._state.client.raw.rows.list(
+                db_name=db_name,
+                table_name=table_name,
+                limit=sample_size,
+            ))
+        except AttributeError:
+            # Fallback to iterator if list() not available
+            rows = []
+            for row in self._state.client.raw.rows(db_name, table_name, limit=sample_size):
+                rows.append(row)
+                if len(rows) >= sample_size:
+                    break
+
+        if not rows:
+            raise NeatSessionError(f"No rows found in {db_name}.{table_name}")
+
+        if verbose:
+            print(f"  Analyzing schema from {len(rows)} rows...")
+
+        # 2. Analyze schema: collect all column names and infer types
+        schema = _analyze_raw_schema(rows)
+
+        if verbose:
+            print(f"  Found {len(schema)} columns")
+            for col_name, col_schema in list(schema.items())[:5]:
+                presence = (col_schema["present_in"] / len(rows)) * 100
+                print(f"    - {col_name}: {col_schema['type']} (present in {presence:.1f}% of rows)")
+            if len(schema) > 5:
+                print(f"    ... and {len(schema) - 5} more")
+
+        # 3. Generate SHACL rules
+        if verbose:
+            print("  Generating SHACL template...")
+
+        shacl_template = _generate_shacl_from_schema(
+            db_name=db_name,
+            table_name=table_name,
+            schema=schema,
+            required_columns=required_columns,
+        )
+
+        if verbose:
+            print("  SHACL template generated successfully!")
+
+        return shacl_template
 
     def _analyze_shacl_references(self, shacl_graph: Graph, verbose: bool = False) -> dict[str, list[dict]]:
         """
@@ -979,3 +1202,153 @@ class ValidateInstancesAPI:
                 traceback.print_exc()
 
         return newly_loaded
+
+
+# Helper functions for SHACL template generation
+
+def _analyze_raw_schema(rows: list) -> dict:
+    """
+    Analyze RAW rows to discover column schema.
+
+    Args:
+        rows: List of Row objects from CDF RAW API
+
+    Returns:
+        Dict mapping column names to schema info:
+        {
+            column_name: {
+                "type": "string" | "int" | "float" | "boolean",
+                "present_in": int,  # Number of rows with this column
+                "nullable": bool,   # True if any row has None/null value
+            }
+        }
+    """
+    from collections import defaultdict
+
+    column_stats = defaultdict(lambda: {
+        "types": set(),
+        "present_in": 0,
+        "nullable": False,
+    })
+
+    for row in rows:
+        columns = row.columns if hasattr(row, 'columns') else row
+        for col_name, value in columns.items():
+            stats = column_stats[col_name]
+            stats["present_in"] += 1
+
+            if value is None:
+                stats["nullable"] = True
+            else:
+                # Infer type
+                if isinstance(value, bool):
+                    stats["types"].add("boolean")
+                elif isinstance(value, int):
+                    stats["types"].add("int")
+                elif isinstance(value, float):
+                    stats["types"].add("float")
+                else:
+                    stats["types"].add("string")
+
+    # Consolidate types (prefer most specific)
+    schema = {}
+    for col_name, stats in column_stats.items():
+        # Choose most restrictive type if multiple found
+        types = stats["types"]
+        if "string" in types:
+            col_type = "string"  # Fallback to string if mixed with other types
+        elif "float" in types:
+            col_type = "float"
+        elif "int" in types:
+            col_type = "int"
+        elif "boolean" in types:
+            col_type = "boolean"
+        else:
+            col_type = "string"
+
+        schema[col_name] = {
+            "type": col_type,
+            "present_in": stats["present_in"],
+            "nullable": stats["nullable"],
+        }
+
+    return schema
+
+
+def _generate_shacl_from_schema(
+    db_name: str,
+    table_name: str,
+    schema: dict,
+    required_columns: list[str] | None = None,
+) -> str:
+    """
+    Generate SHACL rules from discovered schema.
+
+    Creates rules for:
+    - Required columns (sh:minCount 1)
+    - Column types (sh:datatype)
+
+    Args:
+        db_name: RAW database name
+        table_name: RAW table name
+        schema: Column schema from analyze_raw_schema()
+        required_columns: List of column names that must be present
+
+    Returns:
+        SHACL rules as Turtle string
+    """
+    namespace = f"raw_{db_name}_{table_name}"
+    uri_base = f"http://purl.org/cognite/raw/{db_name}/{table_name}/"
+
+    # Build SHACL document
+    rules = [
+        f"@prefix sh: <http://www.w3.org/ns/shacl#> .",
+        f"@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .",
+        f"@prefix {namespace}: <{uri_base}> .",
+        "",
+        f"# SHACL template for RAW table: {db_name}.{table_name}",
+        f"# Auto-generated from {len(schema)} columns found in sample rows",
+        f"# Edit this template to add custom constraints (ranges, patterns, etc.)",
+        "",
+    ]
+
+    # Create shape for each column
+    for col_name, col_schema in schema.items():
+        is_required = required_columns and col_name in required_columns
+        col_presence = (col_schema["present_in"] / len(schema)) * 100 if schema else 0
+
+        # Column presence shape
+        shape_name = f"{namespace}:{col_name.replace('-', '_').replace(' ', '_')}Shape"
+        rules.extend([
+            f"# Column: {col_name}",
+            f"# Type: {col_schema['type']}, Present in: {col_presence:.0f}% of rows, Nullable: {col_schema['nullable']}",
+            f"{shape_name}",
+            f"    a sh:NodeShape ;",
+            f"    sh:targetClass {namespace}:{table_name} ;",
+            f"    sh:property [",
+            f"        sh:path {namespace}:{col_name.replace('-', '_').replace(' ', '_')} ;",
+        ])
+
+        # Add minCount if required
+        if is_required:
+            rules.append(f"        sh:minCount 1 ;")
+            rules.append(f"        sh:message \"{col_name} is required\" ;")
+
+        # Add datatype constraint
+        xsd_type = {
+            "string": "xsd:string",
+            "int": "xsd:integer",
+            "float": "xsd:double",
+            "boolean": "xsd:boolean",
+        }.get(col_schema["type"], "xsd:string")
+
+        if not col_schema["nullable"]:
+            rules.append(f"        sh:datatype {xsd_type} ;")
+            rules.append(f"        sh:message \"{col_name} must be of type {col_schema['type']}\" ;")
+
+        rules.extend([
+            f"    ] .",
+            "",
+        ])
+
+    return "\n".join(rules)
