@@ -49,7 +49,6 @@ class DictExtractor(BaseExtractor):
             if isinstance(value, float | bool | int):
                 yield key, Literal(value)
             if isinstance(value, str):
-
                 yield key, Literal(string_to_ideal_type(value)) if self.str_to_ideal_type else Literal(value)
             elif isinstance(value, dict) and unpack_json:
                 yield from self._unpack_json(value)

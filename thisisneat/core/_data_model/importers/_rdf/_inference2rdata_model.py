@@ -13,7 +13,7 @@ from rdflib import Literal as RdfLiteral
 from thisisneat.core._config import GLOBAL_CONFIG
 from thisisneat.core._constants import NEAT, get_default_prefixes_and_namespaces
 from thisisneat.core._data_model.analysis import DataModelAnalysis
-from thisisneat.core._data_model.models import ConceptualDataModel, data_types
+from thisisneat.core._data_model.models import ConceptualDataModel
 from thisisneat.core._data_model.models.conceptual import (
     Concept,
     ConceptualMetadata,

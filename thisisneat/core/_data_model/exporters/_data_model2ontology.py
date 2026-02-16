@@ -600,8 +600,7 @@ class SHACLPropertyShape(_BaseConfig):
         if self.node_kind == SHACL.Literal:
             triples.append((self.id_, SHACL.datatype, self.expected_value_type))
         else:
-            if not remove_namespace_from_uri(self.expected_value_type).lower() == "N/A".lower():
-                triples.append((self.id_, SHACL["class"], self.expected_value_type))
+            triples.append((self.id_, SHACL["class"], self.expected_value_type))
 
         return triples
 

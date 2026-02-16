@@ -15,6 +15,24 @@ from thisisneat.core._data_model.models.physical import UnverifiedPhysicalDataMo
 from thisisneat.core._utils.spreadsheet import read_individual_sheet
 
 
+@pytest.fixture(autouse=True)
+def cleanup_cdf_sparql_functions():
+    """
+    Cleanup CDF SPARQL functions after each test to prevent pollution.
+
+    The CDF SPARQL functions are registered globally in rdflib's CUSTOM_EVALS,
+    which can interfere with unrelated tests that use SPARQL queries.
+    """
+    yield
+    # Cleanup after test
+    try:
+        from thisisneat.core._cdf_sparql_functions import unregister_cdf_sparql_functions
+
+        unregister_cdf_sparql_functions()
+    except ImportError:
+        pass  # Module not available, nothing to cleanup
+
+
 @pytest.fixture(scope="session")
 def alice_spreadsheet() -> dict[str, dict[str, Any]]:
     filepath = DOC_RULES / "cdf-dms-architect-alice.xlsx"
