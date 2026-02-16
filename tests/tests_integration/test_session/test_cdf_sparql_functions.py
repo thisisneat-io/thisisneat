@@ -412,7 +412,7 @@ class TestCDFSparqlFunctions:
                         sh:declare [ sh:prefix "cdf_indsl" ; sh:namespace "https://cognite.com/cdf/indsl/"^^xsd:anyURI ] ;
                         sh:declare [ sh:prefix "ts" ; sh:namespace "http://purl.org/cognite/{CDM_SPACE}/{CDM_TIMESERIES_VIEW}/"^^xsd:anyURI ]
                     ] ;
-                    sh:select "SELECT $this WHERE {{ $this a ts:{CDM_TIMESERIES_VIEW} . BIND(cdf_indsl:out_of_range($this) AS ?o) FILTER(?o = true) }}"
+                    sh:select "SELECT $this WHERE {{ $this a ts:{CDM_TIMESERIES_VIEW} . BIND(cdf_indsl:out_of_range($this) AS ?o) FILTER(?o > 0) }}"
                 ] .
         """
 
@@ -435,7 +435,7 @@ class TestCDFSparqlFunctions:
         test_space: dm.Space,
         test_timeseries_bad: NodeId,
     ) -> None:
-        """Test cdf_indsl:extreme_outliers returns True for bad data with outliers."""
+        """Test cdf_indsl:extreme_outliers returns count > 0 for bad data with outliers."""
         neat = NeatSession(client=NeatClient(cognite_client))
 
         instances = self._create_instances_dict(
@@ -459,7 +459,7 @@ class TestCDFSparqlFunctions:
                         sh:declare [ sh:prefix "cdf_indsl" ; sh:namespace "https://cognite.com/cdf/indsl/"^^xsd:anyURI ] ;
                         sh:declare [ sh:prefix "ts" ; sh:namespace "http://purl.org/cognite/{CDM_SPACE}/{CDM_TIMESERIES_VIEW}/"^^xsd:anyURI ]
                     ] ;
-                    sh:select "SELECT $this WHERE {{ $this a ts:{CDM_TIMESERIES_VIEW} . BIND(cdf_indsl:extreme_outliers($this, 0.05, 0.167, 3) AS ?o) FILTER(?o = true) }}"
+                    sh:select "SELECT $this WHERE {{ $this a ts:{CDM_TIMESERIES_VIEW} . BIND(cdf_indsl:extreme_outliers($this, 0.05, 0.167, 3) AS ?o) FILTER(?o > 0) }}"
                 ] .
         """
 
@@ -482,7 +482,7 @@ class TestCDFSparqlFunctions:
         test_space: dm.Space,
         test_timeseries_good: NodeId,
     ) -> None:
-        """Test cdf_indsl:gaps_identification returns False for regular data."""
+        """Test cdf_indsl:gaps_identification returns 0 for regular data."""
         neat = NeatSession(client=NeatClient(cognite_client))
 
         instances = self._create_instances_dict(
@@ -506,7 +506,7 @@ class TestCDFSparqlFunctions:
                         sh:declare [ sh:prefix "cdf_indsl" ; sh:namespace "https://cognite.com/cdf/indsl/"^^xsd:anyURI ] ;
                         sh:declare [ sh:prefix "ts" ; sh:namespace "http://purl.org/cognite/{CDM_SPACE}/{CDM_TIMESERIES_VIEW}/"^^xsd:anyURI ]
                     ] ;
-                    sh:select "SELECT $this WHERE {{ $this a ts:{CDM_TIMESERIES_VIEW} . BIND(cdf_indsl:gaps_identification($this, 3.0) AS ?g) FILTER(?g = true) }}"
+                    sh:select "SELECT $this WHERE {{ $this a ts:{CDM_TIMESERIES_VIEW} . BIND(cdf_indsl:gaps_identification($this, 3.0) AS ?g) FILTER(?g > 0) }}"
                 ] .
         """
 
@@ -529,7 +529,7 @@ class TestCDFSparqlFunctions:
         test_space: dm.Space,
         test_timeseries_bad: NodeId,
     ) -> None:
-        """Test cdf_indsl:gaps_identification returns True for data with gaps."""
+        """Test cdf_indsl:gaps_identification returns count > 0 for data with gaps."""
         neat = NeatSession(client=NeatClient(cognite_client))
 
         instances = self._create_instances_dict(
@@ -553,7 +553,7 @@ class TestCDFSparqlFunctions:
                         sh:declare [ sh:prefix "cdf_indsl" ; sh:namespace "https://cognite.com/cdf/indsl/"^^xsd:anyURI ] ;
                         sh:declare [ sh:prefix "ts" ; sh:namespace "http://purl.org/cognite/{CDM_SPACE}/{CDM_TIMESERIES_VIEW}/"^^xsd:anyURI ]
                     ] ;
-                    sh:select "SELECT $this WHERE {{ $this a ts:{CDM_TIMESERIES_VIEW} . BIND(cdf_indsl:gaps_identification($this, 3.0) AS ?g) FILTER(?g = true) }}"
+                    sh:select "SELECT $this WHERE {{ $this a ts:{CDM_TIMESERIES_VIEW} . BIND(cdf_indsl:gaps_identification($this, 3.0) AS ?g) FILTER(?g > 0) }}"
                 ] .
         """
 
@@ -600,7 +600,7 @@ class TestCDFSparqlFunctions:
                         sh:declare [ sh:prefix "cdf_indsl" ; sh:namespace "https://cognite.com/cdf/indsl/"^^xsd:anyURI ] ;
                         sh:declare [ sh:prefix "ts" ; sh:namespace "http://purl.org/cognite/{CDM_SPACE}/{CDM_TIMESERIES_VIEW}/"^^xsd:anyURI ]
                     ] ;
-                    sh:select "SELECT $this WHERE {{ $this a ts:{CDM_TIMESERIES_VIEW} . BIND(cdf_indsl:value_decrease_check($this, 50.0) AS ?d) FILTER(?d = true) }}"
+                    sh:select "SELECT $this WHERE {{ $this a ts:{CDM_TIMESERIES_VIEW} . BIND(cdf_indsl:value_decrease_check($this, 50.0) AS ?d) FILTER(?d > 0) }}"
                 ] .
         """
 
@@ -647,7 +647,7 @@ class TestCDFSparqlFunctions:
                         sh:declare [ sh:prefix "cdf_indsl" ; sh:namespace "https://cognite.com/cdf/indsl/"^^xsd:anyURI ] ;
                         sh:declare [ sh:prefix "ts" ; sh:namespace "http://purl.org/cognite/{CDM_SPACE}/{CDM_TIMESERIES_VIEW}/"^^xsd:anyURI ]
                     ] ;
-                    sh:select "SELECT $this WHERE {{ $this a ts:{CDM_TIMESERIES_VIEW} . BIND(cdf_indsl:value_decrease_check($this, 10.0) AS ?d) FILTER(?d = true) }}"
+                    sh:select "SELECT $this WHERE {{ $this a ts:{CDM_TIMESERIES_VIEW} . BIND(cdf_indsl:value_decrease_check($this, 10.0) AS ?d) FILTER(?d > 0) }}"
                 ] .
         """
 
@@ -670,7 +670,7 @@ class TestCDFSparqlFunctions:
         test_space: dm.Space,
         test_timeseries_good: NodeId,
     ) -> None:
-        """Test cdf_indsl:out_of_range returns False for normal data."""
+        """Test cdf_indsl:out_of_range returns 0 for normal data."""
         neat = NeatSession(client=NeatClient(cognite_client))
 
         instances = self._create_instances_dict(
@@ -694,7 +694,7 @@ class TestCDFSparqlFunctions:
                         sh:declare [ sh:prefix "cdf_indsl" ; sh:namespace "https://cognite.com/cdf/indsl/"^^xsd:anyURI ] ;
                         sh:declare [ sh:prefix "ts" ; sh:namespace "http://purl.org/cognite/{CDM_SPACE}/{CDM_TIMESERIES_VIEW}/"^^xsd:anyURI ]
                     ] ;
-                    sh:select "SELECT $this WHERE {{ $this a ts:{CDM_TIMESERIES_VIEW} . BIND(cdf_indsl:out_of_range($this) AS ?r) FILTER(?r = true) }}"
+                    sh:select "SELECT $this WHERE {{ $this a ts:{CDM_TIMESERIES_VIEW} . BIND(cdf_indsl:out_of_range($this) AS ?r) FILTER(?r > 0) }}"
                 ] .
         """
 
