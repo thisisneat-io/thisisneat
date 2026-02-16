@@ -86,6 +86,8 @@ class ValidateInstancesAPI:
         datamodel_external_id: str,
         datamodel_version: str,
         auto_load_depth: int = 2,
+        max_auto_load_instances: int = 10000,
+        max_reverse_relations_per_query: int = 1000,
         verbose: bool = True,
         default_view_space: str | None = None,
         default_view_name: str | None = None,
@@ -122,6 +124,10 @@ class ValidateInstancesAPI:
             datamodel_external_id: External ID of the data model
             datamodel_version: Version of the data model
             auto_load_depth: Maximum depth for auto-loading referenced instances (default: 2)
+            max_auto_load_instances: Maximum total instances to auto-load across all depths (default: 10000).
+                Prevents excessive memory usage and API calls. Set to -1 for unlimited.
+            max_reverse_relations_per_query: Maximum reverse relation instances to load per query (default: 1000).
+                Prevents unbounded queries on highly connected entities. Set to -1 for unlimited (not recommended).
             verbose: Print progress messages (default: True)
             default_view_space: Default view space for instances without properties
             default_view_name: Default view name for instances without properties
@@ -264,6 +270,8 @@ class ValidateInstancesAPI:
                 datamodel_version,
                 namespace,
                 max_depth=auto_load_depth,
+                max_instances=max_auto_load_instances,
+                max_reverse_relations_per_query=max_reverse_relations_per_query,
                 verbose=verbose,
             )
             if verbose:
@@ -455,25 +463,54 @@ class ValidateInstancesAPI:
         datamodel_version: str,
         namespace: Namespace,
         max_depth: int = 2,
+        max_instances: int = 10000,
+        max_reverse_relations_per_query: int = 1000,
         verbose: bool = False,
     ) -> int:
         """
         Auto-load referenced instances from DMS based on sh:node constraints.
         Supports recursive loading up to max_depth levels.
 
+        Args:
+            max_instances: Maximum total instances to auto-load. Set to -1 for unlimited.
+            max_reverse_relations_per_query: Max reverse relations per query. Set to -1 for unlimited.
+
         Returns:
             Count of instances loaded
         """
+        import time
+        start_time = time.time()
+
         total_loaded = 0
         loaded_ids = {inst.get("externalId") for inst in instances}
 
+        # Performance metrics
+        metrics = {
+            "api_calls": 0,
+            "views_retrieved": 0,
+            "reverse_queries": 0,
+            "forward_refs": 0,
+        }
+
         # Cache of view -> property mappings
         view_property_cache: dict[str, tuple[dict[str, dm.ViewId], dict[str, tuple[dm.ViewId, str]]]] = {}
+
+        # Cache of retrieved view objects to avoid repeated API calls
+        view_objects_cache: dict[dm.ViewId, dm.View] = {}
+
+        # Track reverse relation chains to detect cycles
+        reverse_relation_chains: set[tuple[str, str]] = set()
 
         # Current instances to scan for references
         current_instances = list(instances)
 
         for depth in range(1, max_depth + 1):
+            # Check if we've hit the max instances limit
+            if max_instances > 0 and total_loaded >= max_instances:
+                if verbose:
+                    print(f"\n    Hit max auto-load limit of {max_instances} instances at depth {depth}")
+                break
+
             if verbose:
                 print(f"\n    --- Auto-load depth {depth}/{max_depth} ---")
 
@@ -484,10 +521,46 @@ class ValidateInstancesAPI:
             # Track reverse relation triples to add: [(source_instance, property_name, target_instance)]
             reverse_relation_triples: list[tuple[tuple[str, str], str, tuple[str, str]]] = []
 
+            # OPTIMIZATION: Collect all view IDs needed at this depth for batch retrieval
+            view_ids_needed: set[dm.ViewId] = set()
+            for instance in current_instances:
+                properties = instance.get("properties", {})
+                for space_key, views in properties.items():
+                    for view_version, props in views.items():
+                        cache_key = f"{space_key}/{view_version}"
+                        if cache_key not in view_property_cache:
+                            # Parse view_version to get ViewId
+                            parts = view_version.split("/")
+                            if len(parts) == 2:
+                                view_name, version = parts
+                            else:
+                                view_name = view_version
+                                version = "v1"
+                            view_id = dm.ViewId(space_key, view_name, version)
+                            if view_id not in view_objects_cache:
+                                view_ids_needed.add(view_id)
+
+            # Batch retrieve all needed views at once
+            if view_ids_needed:
+                if verbose:
+                    print(f"    Batch retrieving {len(view_ids_needed)} view definitions...")
+                try:
+                    retrieved_views = client.data_modeling.views.retrieve(list(view_ids_needed))
+                    metrics["api_calls"] += 1
+                    if retrieved_views:
+                        for view in retrieved_views:
+                            view_objects_cache[view.as_id()] = view
+                            metrics["views_retrieved"] += 1
+                except Exception as e:
+                    logger.warning(f"Could not batch retrieve views: {e}")
+                    if verbose:
+                        print("    Warning: Batch view retrieval failed, falling back to individual retrieval")
+
+            # Now process instances with cached views
             for instance in current_instances:
                 instance_space = instance.get("space", datamodel_space)
                 instance_ext_id = instance.get("externalId")
-                
+
                 properties = instance.get("properties", {})
                 for space_key, views in properties.items():
                     for view_version, props in views.items():
@@ -495,7 +568,7 @@ class ValidateInstancesAPI:
                         cache_key = f"{space_key}/{view_version}"
                         if cache_key not in view_property_cache:
                             view_property_cache[cache_key] = self._get_view_property_mappings(
-                                client, space_key, view_version, verbose
+                                client, space_key, view_version, view_objects_cache, verbose
                             )
                         prop_to_view, reverse_relations = view_property_cache[cache_key]
 
@@ -513,6 +586,7 @@ class ValidateInstancesAPI:
                                         "target_view": prop_to_view.get(prop_name),
                                         "source_instance": instance.get("externalId"),
                                     }
+                                    metrics["forward_refs"] += 1
                             elif isinstance(prop_value, list):
                                 for item in prop_value:
                                     if isinstance(item, dict) and "externalId" in item:
@@ -529,6 +603,13 @@ class ValidateInstancesAPI:
                         
                         # Collect reverse relation queries
                         for rev_prop_name, (source_view, through_prop) in reverse_relations.items():
+                            # Cycle detection: Check if this reverse relation chain was already processed
+                            chain_key = (f"{space_key}/{view_version}", f"{source_view.space}/{source_view.external_id}/{source_view.version}")
+                            if chain_key in reverse_relation_chains:
+                                if verbose:
+                                    print(f"        Skipping reverse relation {rev_prop_name} - cycle detected")
+                                continue
+
                             if verbose:
                                 print(f"        Collecting reverse query for {rev_prop_name}: {source_view.external_id}.{through_prop}")
                             query_key = (source_view, through_prop, rev_prop_name)  # Include prop name in key
@@ -538,6 +619,8 @@ class ValidateInstancesAPI:
                             prop_name, instance_list = reverse_queries[query_key]
                             instance_list.append((instance_space, instance_ext_id))
                             reverse_queries[query_key] = (prop_name, instance_list)
+                            # Mark this chain as processed
+                            reverse_relation_chains.add(chain_key)
             
             # Query for reverse relation instances
             if reverse_queries and verbose:
@@ -546,12 +629,13 @@ class ValidateInstancesAPI:
             for (source_view, through_prop, _), (rev_prop_name, target_instances) in reverse_queries.items():
                 if verbose:
                     print(f"      Reverse: {source_view.external_id}.{through_prop} -> {len(target_instances)} instances")
-                
+
                 try:
                     # Build filter to find instances that reference any of our target instances
                     # Filter: source_view instances where through_prop points to any of target_instances
                     from cognite.client.data_classes import filters as dms_filters
-                    
+                    from cognite.client.exceptions import CogniteAPIError
+
                     # Create OR filter for all target instances
                     or_filters = []
                     for target_space, target_ext_id in target_instances:
@@ -561,20 +645,29 @@ class ValidateInstancesAPI:
                                 {"space": target_space, "externalId": target_ext_id}
                             )
                         )
-                    
+
                     # Combine with OR if multiple targets
                     if len(or_filters) == 1:
                         filter_expr = or_filters[0]
                     else:
                         filter_expr = dms_filters.Or(*or_filters)
-                    
-                    # Query instances
+
+                    # Query instances with limit to prevent unbounded loading
+                    query_limit = max_reverse_relations_per_query if max_reverse_relations_per_query > 0 else -1
                     result = client.data_modeling.instances.list(
                         instance_type="node",
                         sources=[source_view],
                         filter=filter_expr,
-                        limit=-1  # Get all matching
+                        limit=query_limit
                     )
+                    metrics["api_calls"] += 1
+                    metrics["reverse_queries"] += 1
+
+                    # Warn if we hit the limit
+                    if max_reverse_relations_per_query > 0 and len(result.data) >= max_reverse_relations_per_query:
+                        if verbose:
+                            print(f"        WARNING: Hit max reverse relations limit ({max_reverse_relations_per_query}). "
+                                  f"Some instances may be missing. Consider increasing max_reverse_relations_per_query.")
                     
                     # Add to to_load and track reverse triples  
                     # Each loaded instance connects back to ALL the target instances we queried for
@@ -615,10 +708,24 @@ class ValidateInstancesAPI:
                     
                     if verbose and len(result.data) > 0:
                         print(f"        Found {len(result.data)} instances")
-                        
+
+                except CogniteAPIError as api_err:
+                    if api_err.code == 403:
+                        logger.error(f"Permission denied for reverse relation query on {source_view.external_id}: {api_err}")
+                        if verbose:
+                            print(f"        ERROR: Permission denied - check access rights for view {source_view.external_id}")
+                    elif api_err.code in (408, 429, 503, 504):
+                        logger.warning(f"Temporary API error for reverse relation query: {api_err}")
+                        if verbose:
+                            print(f"        WARNING: Temporary API error (code {api_err.code}) - some instances may be missing")
+                    else:
+                        logger.error(f"API error in reverse relation query: {api_err}")
+                        if verbose:
+                            print(f"        ERROR: API error (code {api_err.code}): {api_err}")
                 except Exception as e:
+                    logger.error(f"Unexpected error in reverse relation query: {e}", exc_info=True)
                     if verbose:
-                        print(f"        Warning: Could not query reverse relation: {e}")
+                        print(f"        ERROR: Unexpected error: {e}")
 
             if not to_load:
                 if verbose:
@@ -645,11 +752,12 @@ class ValidateInstancesAPI:
             if reverse_relation_triples:
                 if verbose:
                     print(f"    Adding {len(reverse_relation_triples)} reverse relation triples to graph")
-                from rdflib import URIRef
-                # Need to map (source_space, source_ext_id) to their view to get correct predicate namespace
+
+                # OPTIMIZATION: Build instance_to_view mapping ONCE before loop
                 # Track which view each source instance belongs to
                 instance_to_view: dict[tuple[str, str], tuple[str, str]] = {}
-                for inst in instances + current_instances:
+                all_instances = list(instances) + newly_loaded  # Use newly_loaded instead of current_instances
+                for inst in all_instances:
                     inst_space = inst.get("space", datamodel_space)
                     inst_ext_id = inst.get("externalId")
                     # Get the view from properties
@@ -660,7 +768,8 @@ class ValidateInstancesAPI:
                             instance_to_view[(inst_space, inst_ext_id)] = (view_space, view_name)
                             break  # Use first view found
                         break
-                
+
+                # Now efficiently add all triples using the pre-built mapping
                 for (source_space, source_ext_id), prop_name, (target_space, target_ext_id) in reverse_relation_triples:
                     # Create URIs for source and target
                     source_ns = Namespace(f"http://purl.org/cognite/{source_space}/")
@@ -688,14 +797,38 @@ class ValidateInstancesAPI:
             if verbose:
                 print(f"    Loaded {len(newly_loaded)} instances at depth {depth}")
 
+        # Log performance metrics
+        elapsed_time = time.time() - start_time
+        if verbose:
+            print("\n  --- Auto-loading Performance Metrics ---")
+            print(f"    Total instances loaded: {total_loaded}")
+            print(f"    Total API calls: {metrics['api_calls']}")
+            print(f"    Views retrieved: {metrics['views_retrieved']}")
+            print(f"    Reverse relation queries: {metrics['reverse_queries']}")
+            print(f"    Forward references found: {metrics['forward_refs']}")
+            print(f"    Time elapsed: {elapsed_time:.2f}s")
+
+        logger.info(
+            f"Auto-loading completed: {total_loaded} instances, "
+            f"{metrics['api_calls']} API calls, {elapsed_time:.2f}s"
+        )
+
         return total_loaded
 
     def _get_view_property_mappings(
-        self, client: NeatClient, space: str, view_version: str, verbose: bool = False
+        self,
+        client: NeatClient,
+        space: str,
+        view_version: str,
+        view_objects_cache: dict[dm.ViewId, dm.View],
+        verbose: bool = False
     ) -> tuple[dict[str, dm.ViewId], dict[str, tuple[dm.ViewId, str]]]:
         """
         Get property -> target view mappings for a view.
-        
+
+        Args:
+            view_objects_cache: Pre-fetched view objects to avoid repeated API calls
+
         Returns:
             Tuple of (forward_mappings, reverse_mappings) where:
             - forward_mappings: dict[property_name, target_view_id]
@@ -714,10 +847,22 @@ class ValidateInstancesAPI:
                 version = "v1"
 
             view_id = dm.ViewId(space, view_name, version)
-            if verbose:
-                print(f"      Looking up view: {view_id.space}/{view_id.external_id}/{view_id.version}")
 
-            full_view = client.data_modeling.views.retrieve(view_id)
+            # Try to use cached view first
+            if view_id in view_objects_cache:
+                full_view = [view_objects_cache[view_id]]
+                if verbose:
+                    print(f"      Using cached view: {view_id.space}/{view_id.external_id}/{view_id.version}")
+            else:
+                # Fall back to individual retrieval if not in cache
+                if verbose:
+                    print(f"      Retrieving view: {view_id.space}/{view_id.external_id}/{view_id.version}")
+                full_view = client.data_modeling.views.retrieve(view_id)
+                if full_view:
+                    # Cache for future use
+                    for v in full_view:
+                        view_objects_cache[v.as_id()] = v
+
             if full_view:
                 for v in full_view:
                     for prop_name, prop_def in v.properties.items():
