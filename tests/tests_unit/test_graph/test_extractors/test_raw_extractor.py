@@ -37,7 +37,7 @@ class TestRAWExtractor:
             client._config = mock_config
 
             # Mock REST API response
-            client._get = Mock(
+            client.get = Mock(
                 return_value={
                     "items": [
                         {"key": "key1", "columns": {"col1": "val1"}, "lastUpdatedTime": 1000},
@@ -60,8 +60,8 @@ class TestRAWExtractor:
         }
 
         # Verify REST API was called with cursor
-        client._get.assert_called_once()
-        call_args = client._get.call_args
+        client.get.assert_called_once()
+        call_args = client.get.call_args
         assert "cursor" in call_args[1]["params"]
         assert call_args[1]["params"]["cursor"] == "test_cursor_123"
 
@@ -74,7 +74,7 @@ class TestRAWExtractor:
             client._config = mock_config
 
             # Mock REST API response
-            client._get = Mock(
+            client.get = Mock(
                 return_value={
                     "items": [
                         {"key": "key1", "columns": {"col1": "val1"}, "lastUpdatedTime": 5000},
@@ -97,8 +97,8 @@ class TestRAWExtractor:
         assert (ns["key1"], ns["col1"], Literal("val1")) in triples
 
         # Verify REST API was called with timestamps
-        client._get.assert_called_once()
-        call_args = client._get.call_args
+        client.get.assert_called_once()
+        call_args = client.get.call_args
         assert call_args[1]["params"]["minLastUpdatedTime"] == 1000
         assert call_args[1]["params"]["maxLastUpdatedTime"] == 10000
 
@@ -111,7 +111,7 @@ class TestRAWExtractor:
             client._config = mock_config
 
             # Mock REST API with multiple pages
-            client._get = Mock(
+            client.get = Mock(
                 side_effect=[
                     {
                         "items": [
@@ -138,7 +138,7 @@ class TestRAWExtractor:
         assert (ns["key2"], ns["col1"], Literal("val2")) in triples
 
         # Verify pagination happened
-        assert client._get.call_count == 2
+        assert client.get.call_count == 2
 
     def test_extract_with_limit(self) -> None:
         """Test extraction respects limit parameter."""
@@ -149,7 +149,7 @@ class TestRAWExtractor:
             client._config = mock_config
 
             # Mock REST API with more rows than limit
-            client._get = Mock(
+            client.get = Mock(
                 return_value={
                     "items": [
                         {"key": f"key{i}", "columns": {"col1": f"val{i}"}, "lastUpdatedTime": i * 1000}

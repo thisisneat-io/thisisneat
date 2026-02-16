@@ -404,12 +404,15 @@ class ValidateInstancesAPI:
             mode = "cursor" if cursor else "timestamp" if min_last_updated_time else "full"
             print(f"  Extracting RAW rows from {db_name}.{table_name} (mode: {mode})...")
 
+        from thisisneat.core._constants import get_raw_namespace
+
         extractor = RAWExtractor(
             client=self._state.client,
             db_name=db_name,
             table_name=table_name,
             table_type=table_type,
             foreign_keys=foreign_keys,
+            namespace=Namespace(get_raw_namespace(db_name, table_name)),
             cursor=cursor,
             min_last_updated_time=min_last_updated_time,
             max_last_updated_time=max_last_updated_time,
@@ -419,10 +422,11 @@ class ValidateInstancesAPI:
         )
 
         data_graph = Graph()
-        row_count = 0
         for triple in extractor.extract():
             data_graph.add(triple)
-            row_count += 1
+
+        # Count unique subjects (rows) in the graph
+        row_count = len(set(s for s, _, _ in data_graph))
 
         if verbose:
             print(f"  Loaded {len(data_graph)} triples from {row_count} rows")
@@ -1332,7 +1336,6 @@ def _generate_shacl_from_schema(
         # Add minCount if required
         if is_required:
             rules.append(f"        sh:minCount 1 ;")
-            rules.append(f"        sh:message \"{col_name} is required\" ;")
 
         # Add datatype constraint
         xsd_type = {
@@ -1344,6 +1347,11 @@ def _generate_shacl_from_schema(
 
         if not col_schema["nullable"]:
             rules.append(f"        sh:datatype {xsd_type} ;")
+
+        # Add single message (prefer required message over type message)
+        if is_required:
+            rules.append(f"        sh:message \"{col_name} is required\" ;")
+        elif not col_schema["nullable"]:
             rules.append(f"        sh:message \"{col_name} must be of type {col_schema['type']}\" ;")
 
         rules.extend([

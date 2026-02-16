@@ -107,7 +107,13 @@ class RAWExtractor(BaseExtractor):
         rows_fetched = 0
         while True:
             # Use client's GET method (similar to how SDK makes API calls internally)
-            res = self.client._get(url_path, params=params)
+            response = self.client.get(url_path, params=params)
+
+            # Handle both Response objects (real API) and dicts (mocked)
+            if isinstance(response, dict):
+                res = response
+            else:
+                res = response.json()
 
             # Convert API response to Row objects and yield them
             items = res.get("items", [])
