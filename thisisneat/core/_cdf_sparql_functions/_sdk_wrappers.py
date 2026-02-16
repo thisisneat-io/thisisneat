@@ -33,13 +33,13 @@ logger = logging.getLogger(__name__)
 def _parse_time_param(value: str | int) -> str | int:
     """
     Parse time parameter, converting millisecond timestamp strings to integers.
-    
+
     The CDF SDK accepts:
     - Relative strings: "30d-ago", "7d-ago", "now"
     - Integer milliseconds: 1736848800000
-    
+
     But NOT string milliseconds: "1736848800000"
-    
+
     This function converts numeric strings to integers for SDK compatibility.
     """
     if isinstance(value, str):
@@ -158,7 +158,7 @@ def create_sdk_wrappers(client: CogniteClient) -> dict[str, Callable]:
             range_ms = end - start
             if range_ms > 86400000:  # More than 1 day
                 granularity = "1d"
-        
+
         result = client.time_series.data.retrieve(
             instance_id=instance_id,
             aggregates=["count"],
@@ -261,7 +261,7 @@ def create_sdk_wrappers(client: CogniteClient) -> dict[str, Callable]:
             range_ms = end - start
             if range_ms > 86400000:  # More than 1 day
                 granularity = "1d"
-        
+
         result = client.time_series.data.retrieve(
             instance_id=instance_id,
             aggregates=["average", "count"],
@@ -318,7 +318,7 @@ def create_sdk_wrappers(client: CogniteClient) -> dict[str, Callable]:
             range_ms = end - start
             if range_ms > 86400000:  # More than 1 day
                 granularity = "1d"
-        
+
         result = client.time_series.data.retrieve(
             instance_id=instance_id,
             aggregates=["min"],
@@ -374,7 +374,7 @@ def create_sdk_wrappers(client: CogniteClient) -> dict[str, Callable]:
             range_ms = end - start
             if range_ms > 86400000:  # More than 1 day
                 granularity = "1d"
-        
+
         result = client.time_series.data.retrieve(
             instance_id=instance_id,
             aggregates=["max"],

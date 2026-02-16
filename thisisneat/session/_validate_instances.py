@@ -11,7 +11,8 @@ Reference:
 """
 
 import logging
-from typing import Any, Iterator
+from collections.abc import Iterator
+from typing import Any
 
 from cognite.client import data_modeling as dm
 from rdflib import Graph, Namespace
@@ -31,21 +32,21 @@ logger = logging.getLogger(__name__)
 
 class SHACLValidationResult:
     """Result from SHACL validation. Backwards compatible - unpacks as 3 values.
-    
+
     Can be used as:
         # Old style (3 values) - BACKWARDS COMPATIBLE
         conforms, report_graph, report_text = result
-        
+
         # Access new cursor via attribute
         new_cursor = result.new_cursor
-        
+
         # Named attributes
         result.conforms
         result.report_graph
         result.report_text
         result.new_cursor
     """
-    
+
     def __init__(
         self,
         conforms: bool,
@@ -57,15 +58,15 @@ class SHACLValidationResult:
         self.report_graph = report_graph
         self.report_text = report_text
         self.new_cursor = new_cursor
-    
+
     def __iter__(self) -> Iterator:
         """Allow unpacking as 3-tuple for backwards compatibility."""
         return iter((self.conforms, self.report_graph, self.report_text))
-    
+
     def __len__(self) -> int:
         """Support len() - returns 3 for backwards compatible unpacking."""
         return 3
-    
+
     def __getitem__(self, index: int) -> Any:
         """Support indexing (0-2 for tuple, new_cursor via attribute)."""
         return (self.conforms, self.report_graph, self.report_text)[index]
@@ -479,6 +480,7 @@ class ValidateInstancesAPI:
             Count of instances loaded
         """
         import time
+
         start_time = time.time()
 
         total_loaded = 0
@@ -516,7 +518,8 @@ class ValidateInstancesAPI:
 
             # Collect all references from current instances
             to_load: dict[tuple[str, str], dict] = {}
-            # Collect reverse relation queries: {(view_id, through_property, prop_name): (property_name, [target_instance_ids])}
+            # Collect reverse relation queries:
+            # {(view_id, through_property, prop_name): (property_name, [target_instance_ids])}
             reverse_queries: dict[tuple[dm.ViewId, str, str], tuple[str, list[tuple[str, str]]]] = {}
             # Track reverse relation triples to add: [(source_instance, property_name, target_instance)]
             reverse_relation_triples: list[tuple[tuple[str, str], str, tuple[str, str]]] = []
@@ -526,7 +529,7 @@ class ValidateInstancesAPI:
             for instance in current_instances:
                 properties = instance.get("properties", {})
                 for space_key, views in properties.items():
-                    for view_version, props in views.items():
+                    for view_version, _props in views.items():
                         cache_key = f"{space_key}/{view_version}"
                         if cache_key not in view_property_cache:
                             # Parse view_version to get ViewId
@@ -600,18 +603,24 @@ class ValidateInstancesAPI:
                                                 "target_view": prop_to_view.get(prop_name),
                                                 "source_instance": instance.get("externalId"),
                                             }
-                        
+
                         # Collect reverse relation queries
                         for rev_prop_name, (source_view, through_prop) in reverse_relations.items():
                             # Cycle detection: Check if this reverse relation chain was already processed
-                            chain_key = (f"{space_key}/{view_version}", f"{source_view.space}/{source_view.external_id}/{source_view.version}")
+                            chain_key = (
+                                f"{space_key}/{view_version}",
+                                f"{source_view.space}/{source_view.external_id}/{source_view.version}",
+                            )
                             if chain_key in reverse_relation_chains:
                                 if verbose:
                                     print(f"        Skipping reverse relation {rev_prop_name} - cycle detected")
                                 continue
 
                             if verbose:
-                                print(f"        Collecting reverse query for {rev_prop_name}: {source_view.external_id}.{through_prop}")
+                                print(
+                                    f"        Collecting reverse query for {rev_prop_name}: "
+                                    f"{source_view.external_id}.{through_prop}"
+                                )
                             query_key = (source_view, through_prop, rev_prop_name)  # Include prop name in key
                             if query_key not in reverse_queries:
                                 reverse_queries[query_key] = (rev_prop_name, [])
@@ -621,14 +630,16 @@ class ValidateInstancesAPI:
                             reverse_queries[query_key] = (prop_name, instance_list)
                             # Mark this chain as processed
                             reverse_relation_chains.add(chain_key)
-            
+
             # Query for reverse relation instances
             if reverse_queries and verbose:
                 print(f"    Querying {len(reverse_queries)} reverse relation types")
-            
+
             for (source_view, through_prop, _), (rev_prop_name, target_instances) in reverse_queries.items():
                 if verbose:
-                    print(f"      Reverse: {source_view.external_id}.{through_prop} -> {len(target_instances)} instances")
+                    print(
+                        f"      Reverse: {source_view.external_id}.{through_prop} -> {len(target_instances)} instances"
+                    )
 
                 try:
                     # Build filter to find instances that reference any of our target instances
@@ -642,7 +653,7 @@ class ValidateInstancesAPI:
                         or_filters.append(
                             dms_filters.Equals(
                                 [source_view.space, source_view.external_id, through_prop],
-                                {"space": target_space, "externalId": target_ext_id}
+                                {"space": target_space, "externalId": target_ext_id},
                             )
                         )
 
@@ -655,10 +666,7 @@ class ValidateInstancesAPI:
                     # Query instances with limit to prevent unbounded loading
                     query_limit = max_reverse_relations_per_query if max_reverse_relations_per_query > 0 else -1
                     result = client.data_modeling.instances.list(
-                        instance_type="node",
-                        sources=[source_view],
-                        filter=filter_expr,
-                        limit=query_limit
+                        instance_type="node", sources=[source_view], filter=filter_expr, limit=query_limit
                     )
                     metrics["api_calls"] += 1
                     metrics["reverse_queries"] += 1
@@ -666,24 +674,30 @@ class ValidateInstancesAPI:
                     # Warn if we hit the limit
                     if max_reverse_relations_per_query > 0 and len(result.data) >= max_reverse_relations_per_query:
                         if verbose:
-                            print(f"        WARNING: Hit max reverse relations limit ({max_reverse_relations_per_query}). "
-                                  f"Some instances may be missing. Consider increasing max_reverse_relations_per_query.")
-                    
-                    # Add to to_load and track reverse triples  
+                            print(
+                                f"        WARNING: Hit max reverse relations limit "
+                                f"({max_reverse_relations_per_query}). "
+                                f"Some instances may be missing. Consider increasing "
+                                f"max_reverse_relations_per_query."
+                            )
+
+                    # Add to to_load and track reverse triples
                     # Each loaded instance connects back to ALL the target instances we queried for
                     for node in result.data:
                         node_space = node.space
                         node_ext_id = node.external_id
-                        
+
                         # Check which target instance(s) this node points to via through_prop
                         node_dict = node.dump(camel_case=True)
                         node_props = node_dict.get("properties", {})
-                        for prop_space, views in node_props.items():
-                            for view_key, props in views.items():
+                        for _prop_space, views in node_props.items():
+                            for _view_key, props in views.items():
                                 through_value = props.get(through_prop)
                                 if through_value:
                                     # Handle single value or list
-                                    targets_to_check = [through_value] if not isinstance(through_value, list) else through_value
+                                    targets_to_check = (
+                                        [through_value] if not isinstance(through_value, list) else through_value
+                                    )
                                     for target_val in targets_to_check:
                                         if isinstance(target_val, dict) and "externalId" in target_val:
                                             target_space = target_val.get("space", datamodel_space)
@@ -691,12 +705,14 @@ class ValidateInstancesAPI:
                                             # Check if this target is one we're collecting for
                                             if (target_space, target_ext_id) in target_instances:
                                                 # Record reverse relation triple with correct property name
-                                                reverse_relation_triples.append((
-                                                    (target_space, target_ext_id),  # Original instance
-                                                    rev_prop_name,  # Property name (e.g., "mcPackagesRel")
-                                                    (node_space, node_ext_id)  # Reverse instance
-                                                ))
-                        
+                                                reverse_relation_triples.append(
+                                                    (
+                                                        (target_space, target_ext_id),  # Original instance
+                                                        rev_prop_name,  # Property name (e.g., "mcPackagesRel")
+                                                        (node_space, node_ext_id),  # Reverse instance
+                                                    )
+                                                )
+
                         if node_ext_id not in loaded_ids:
                             to_load[(node_space, node_ext_id)] = {
                                 "space": node_space,
@@ -705,19 +721,27 @@ class ValidateInstancesAPI:
                                 "target_view": source_view,
                                 "source_instance": "reverse_relation",
                             }
-                    
+
                     if verbose and len(result.data) > 0:
                         print(f"        Found {len(result.data)} instances")
 
                 except CogniteAPIError as api_err:
                     if api_err.code == 403:
-                        logger.error(f"Permission denied for reverse relation query on {source_view.external_id}: {api_err}")
+                        logger.error(
+                            f"Permission denied for reverse relation query on {source_view.external_id}: {api_err}"
+                        )
                         if verbose:
-                            print(f"        ERROR: Permission denied - check access rights for view {source_view.external_id}")
+                            print(
+                                f"        ERROR: Permission denied - check access rights for view "
+                                f"{source_view.external_id}"
+                            )
                     elif api_err.code in (408, 429, 503, 504):
                         logger.warning(f"Temporary API error for reverse relation query: {api_err}")
                         if verbose:
-                            print(f"        WARNING: Temporary API error (code {api_err.code}) - some instances may be missing")
+                            print(
+                                f"        WARNING: Temporary API error (code {api_err.code}) - "
+                                f"some instances may be missing"
+                            )
                     else:
                         logger.error(f"API error in reverse relation query: {api_err}")
                         if verbose:
@@ -747,7 +771,7 @@ class ValidateInstancesAPI:
             newly_loaded = self._load_instances_by_view(
                 client, to_load, data_graph, namespace, datamodel_space, loaded_ids, verbose
             )
-            
+
             # Add reverse relation triples to the graph
             if reverse_relation_triples:
                 if verbose:
@@ -776,15 +800,17 @@ class ValidateInstancesAPI:
                     target_ns = Namespace(f"http://purl.org/cognite/{target_space}/")
                     source_uri = source_ns[source_ext_id]
                     target_uri = target_ns[target_ext_id]
-                    
+
                     # Create predicate URI using the source instance's view namespace
-                    view_space, view_name = instance_to_view.get((source_space, source_ext_id), (datamodel_space, "UnknownView"))
+                    view_space, view_name = instance_to_view.get(
+                        (source_space, source_ext_id), (datamodel_space, "UnknownView")
+                    )
                     pred_ns = Namespace(f"http://purl.org/cognite/{view_space}/{view_name}/")
                     predicate_uri = pred_ns[prop_name]
-                    
+
                     # Add triple to graph
                     data_graph.add((source_uri, predicate_uri, target_uri))
-                    
+
                     if verbose:
                         print(f"      {source_ext_id}.{prop_name} -> {target_ext_id}")
                         print(f"        Subject: {source_uri}")
@@ -809,8 +835,7 @@ class ValidateInstancesAPI:
             print(f"    Time elapsed: {elapsed_time:.2f}s")
 
         logger.info(
-            f"Auto-loading completed: {total_loaded} instances, "
-            f"{metrics['api_calls']} API calls, {elapsed_time:.2f}s"
+            f"Auto-loading completed: {total_loaded} instances, {metrics['api_calls']} API calls, {elapsed_time:.2f}s"
         )
 
         return total_loaded
@@ -821,7 +846,7 @@ class ValidateInstancesAPI:
         space: str,
         view_version: str,
         view_objects_cache: dict[dm.ViewId, dm.View],
-        verbose: bool = False
+        verbose: bool = False,
     ) -> tuple[dict[str, dm.ViewId], dict[str, tuple[dm.ViewId, str]]]:
         """
         Get property -> target view mappings for a view.
@@ -870,7 +895,10 @@ class ValidateInstancesAPI:
                         if isinstance(prop_def, dm.MultiReverseDirectRelation):
                             reverse_relations[prop_name] = (prop_def.source, prop_def.through.property)
                             if verbose:
-                                print(f"        {prop_name} <- {prop_def.source.external_id}/{prop_def.source.version} (through {prop_def.through.property})")
+                                print(
+                                    f"        {prop_name} <- {prop_def.source.external_id}/"
+                                    f"{prop_def.source.version} (through {prop_def.through.property})"
+                                )
                         # Forward direct relations
                         elif hasattr(prop_def, "source") and prop_def.source:
                             property_to_target_view[prop_name] = prop_def.source

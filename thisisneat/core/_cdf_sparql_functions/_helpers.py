@@ -13,6 +13,7 @@ import logging
 import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from datetime import datetime
 from functools import lru_cache, wraps
 from typing import TYPE_CHECKING, Any
 
@@ -78,7 +79,7 @@ class DataFetchConfig:
             raise ValueError("subscription_external_id required for subscription mode")
 
     @classmethod
-    def normal(cls, start: str = "7d-ago", end: str = "now", limit: int | None = None) -> "DataFetchConfig":
+    def normal(cls, start: str = "7d-ago", end: str = "now", limit: int | None = None) -> DataFetchConfig:
         """Create config for normal mode with time range."""
         return cls(mode="normal", start=start, end=end, limit=limit)
 
@@ -88,7 +89,7 @@ class DataFetchConfig:
         external_id: str,
         cursor: str | None = None,
         partitions: int = 1,
-    ) -> "DataFetchConfig":
+    ) -> DataFetchConfig:
         """Create config for subscription mode."""
         return cls(
             mode="subscription",
@@ -98,7 +99,7 @@ class DataFetchConfig:
         )
 
     @classmethod
-    def backfill(cls, start: str = "30d-ago", end: str = "now", limit: int | None = None) -> "DataFetchConfig":
+    def backfill(cls, start: str = "30d-ago", end: str = "now", limit: int | None = None) -> DataFetchConfig:
         """Create config for backfill mode with custom time range."""
         return cls(mode="backfill", start=start, end=end, limit=limit)
 
@@ -211,30 +212,30 @@ def verify_timeseries_exists(
 def _parse_time_to_sdk_format(time_value: str | int) -> str | int | datetime:
     """
     Parse time value to a format the CDF SDK accepts.
-    
+
     SDK accepts:
     - Relative strings: "30d-ago", "7d-ago", "now"
     - Integer milliseconds: 1736848800000
     - datetime objects
-    
+
     NOT accepted:
     - ISO strings: "2026-01-15T10:00:00+00:00"
     - String milliseconds: "1736848800000"
     """
-    from datetime import datetime, timezone
-    
+    from datetime import timezone
+
     if isinstance(time_value, int):
         return time_value
-    
+
     if isinstance(time_value, str):
         # Check if it's a numeric string (milliseconds timestamp)
         if time_value.isdigit() or (time_value.startswith("-") and time_value[1:].isdigit()):
             return int(time_value)
-        
+
         # Check if it's a relative time string (SDK native format)
         if time_value == "now" or time_value.endswith("-ago") or time_value.endswith("-ahead"):
             return time_value
-        
+
         # Try to parse as ISO string
         try:
             # Try with timezone
@@ -247,7 +248,7 @@ def _parse_time_to_sdk_format(time_value: str | int) -> str | int | datetime:
             return int(dt.timestamp() * 1000)
         except ValueError:
             pass
-    
+
     # Return as-is and let SDK handle/error
     return time_value
 
@@ -269,7 +270,7 @@ def get_timeseries_datapoints(
     Args:
         client: CogniteClient instance
         instance_id: NodeId with space and external_id
-        start: Start time (default: 30 days ago). Accepts relative ("7d-ago"), 
+        start: Start time (default: 30 days ago). Accepts relative ("7d-ago"),
                ISO strings ("2026-01-15T10:00:00+00:00"), or milliseconds
         end: End time (default: now)
         limit: Maximum number of datapoints to retrieve
