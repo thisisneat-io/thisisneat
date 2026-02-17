@@ -82,7 +82,7 @@ class TestRawSHACLValidation:
             pass
 
     def test_validate_raw_passing(self, cognite_client: CogniteClient, test_raw_table: tuple[str, str]) -> None:
-        """Test SHACL validation with RAW rows that conform to rules."""
+        """Test SHACL validation with RAW rows - expects both valid and invalid records."""
         db_name, table_name = test_raw_table
         neat = NeatSession(client=cognite_client)
 
@@ -111,16 +111,28 @@ class TestRawSHACLValidation:
                 ] .
         """
 
-        # Validate only the valid sensors using limit
+        # Validate all rows (2 valid, 1 invalid)
         result = neat.validate_instances.with_shacl_raw(
             db_name=db_name,
             table_name=table_name,
             shacl_rules=shacl_rules,
-            limit=2,  # Only validate first 2 rows (which are valid)
             verbose=False,
         )
 
-        assert result.conforms is True, f"Validation should pass. Report: {result.report_text}"
+        # Validation should fail overall due to sensor_invalid
+        assert result.conforms is False, f"Validation should fail due to invalid row. Report: {result.report_text}"
+
+        # Check that expected violations are reported
+        report_lower = result.report_text.lower()
+        assert "device_id" in report_lower or "mincount" in report_lower, (
+            f"Report should mention device_id violation: {result.report_text}"
+        )
+        assert "temperature" in report_lower or "maxinclusive" in report_lower, (
+            f"Report should mention temperature violation: {result.report_text}"
+        )
+
+        # Check that sensor_invalid is the focus node in violations
+        assert "sensor_invalid" in result.report_text, f"Report should identify sensor_invalid: {result.report_text}"
 
     def test_validate_raw_failing(self, cognite_client: CogniteClient, test_raw_table: tuple[str, str]) -> None:
         """Test SHACL validation with RAW rows that violate rules."""
