@@ -109,6 +109,30 @@ EXAMPLE_GRAPHS = PACKAGE_DIRECTORY / "core" / "_instances" / "examples"
 DEFAULT_SPACE_URI = "http://purl.org/cognite/space/{space}#"
 SPACE_URI_PATTERN = re.compile(r"http://purl.org/cognite/space/(?P<space>[^#]+)#$")
 DEFAULT_RAW_URI = "http://purl.org/cognite/raw#"
+
+
+def get_raw_namespace(db_name: str, table_name: str) -> str:
+    """
+    Get namespaced URI for RAW table to enable table-specific SHACL targeting.
+
+    Args:
+        db_name: RAW database name
+        table_name: RAW table name
+
+    Returns:
+        Namespace URI string (e.g., "http://purl.org/cognite/raw/iot/sensors/")
+
+    Example:
+        # Enable SHACL rules to target specific tables via sh:targetClass
+        @prefix raw_iot_sensors: <http://purl.org/cognite/raw/iot/sensors/> .
+        raw_iot_sensors:SensorShape
+            a sh:NodeShape ;
+            sh:targetClass raw_iot_sensors:sensors ;
+            ...
+    """
+    return f"http://purl.org/cognite/raw/{db_name}/{table_name}/"
+
+
 DEFAULT_NAMESPACE = Namespace("http://purl.org/cognite/neat/")
 CDF_NAMESPACE = Namespace("https://cognitedata.com/")
 DEFAULT_BASE_URI = URIRef(DEFAULT_NAMESPACE)

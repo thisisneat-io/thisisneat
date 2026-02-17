@@ -176,3 +176,4 @@ real_cases/
 docs/**/*.aml
 docs/**/*.xml
 tmp/
+.claude/settings.json

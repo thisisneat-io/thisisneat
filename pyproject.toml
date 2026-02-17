@@ -1,6 +1,6 @@
 [project]
 name = "thisisneat"
-version = "0.2.3"
+version = "0.2.4"
 readme = "README.md"
 description = "Knowledge graph transformation"
 authors = [
