@@ -11,7 +11,6 @@ Tests verify:
 
 from unittest.mock import Mock
 
-import pytest
 from cognite.client.data_classes import Row
 
 from thisisneat.core._client.testing import monkeypatch_neat_client

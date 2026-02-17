@@ -3956,7 +3956,7 @@ wheels = [
 
 [[package]]
 name = "thisisneat"
-version = "0.2.2"
+version = "0.2.4"
 source = { editable = "." }
 dependencies = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'" },

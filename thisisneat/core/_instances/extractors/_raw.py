@@ -85,7 +85,9 @@ class RAWExtractor(BaseExtractor):
         API endpoints:
         - GET /api/v1/projects/{project}/raw/dbs/{db}/tables/{table}/rows
         """
-        url_path = f"/api/v1/projects/{self.client._config.project}/raw/dbs/{self.db_name}/tables/{self.table_name}/rows"
+        url_path = (
+            f"/api/v1/projects/{self.client._config.project}/raw/dbs/{self.db_name}/tables/{self.table_name}/rows"
+        )
 
         # Initial parameters
         params = {}

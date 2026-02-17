@@ -1570,10 +1570,17 @@ def _generate_shacl_from_schema(
         if not col_schema["nullable"]:
             rules.append(f"        sh:datatype {xsd_type} ;")
 
-        # Add single message (prefer required message over type message)
-        if is_required:
+        # Add helpful error message
+        if is_required and not col_schema["nullable"]:
+            # Both required and has type constraint
+            rules.append(
+                f"        sh:message \"{col_name} is required and must be of type {col_schema['type']}\" ;"
+            )
+        elif is_required:
+            # Only required
             rules.append(f"        sh:message \"{col_name} is required\" ;")
         elif not col_schema["nullable"]:
+            # Only type constraint
             rules.append(f"        sh:message \"{col_name} must be of type {col_schema['type']}\" ;")
 
         rules.extend([

@@ -12,6 +12,7 @@ These tests verify:
 
 import pytest
 from cognite.client import CogniteClient
+from cognite.client.data_classes import Row
 
 from thisisneat import NeatSession
 
@@ -39,35 +40,35 @@ class TestRawSHACLValidation:
 
         # Insert test rows
         test_rows = [
-            {
-                "key": "sensor_001",
-                "columns": {
+            Row(
+                key="sensor_001",
+                columns={
                     "device_id": "sensor_001",
                     "name": "Temperature Sensor 1",
                     "temperature": 22.5,
                     "humidity": 45.0,
                     "status": "active",
                 },
-            },
-            {
-                "key": "sensor_002",
-                "columns": {
+            ),
+            Row(
+                key="sensor_002",
+                columns={
                     "device_id": "sensor_002",
                     "name": "Temperature Sensor 2",
                     "temperature": 23.1,
                     "humidity": 48.0,
                     "status": "active",
                 },
-            },
-            {
-                "key": "sensor_invalid",
-                "columns": {
+            ),
+            Row(
+                key="sensor_invalid",
+                columns={
                     # Missing required device_id
                     "name": "Invalid Sensor",
                     "temperature": 150.0,  # Out of valid range
                     "status": "error",
                 },
-            },
+            ),
         ]
 
         cognite_client.raw.rows.insert(db_name, table_name, test_rows, ensure_parent=True)
