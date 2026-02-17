@@ -552,11 +552,13 @@ class ValidateInstancesAPI:
             print(f"  Fetching {sample_size} sample rows from {db_name}.{table_name}...")
 
         try:
-            rows = list(self._state.client.raw.rows.list(
-                db_name=db_name,
-                table_name=table_name,
-                limit=sample_size,
-            ))
+            rows = list(
+                self._state.client.raw.rows.list(
+                    db_name=db_name,
+                    table_name=table_name,
+                    limit=sample_size,
+                )
+            )
         except AttributeError:
             # Fallback to iterator if list() not available
             rows = []
@@ -1069,9 +1071,7 @@ class ValidateInstancesAPI:
                             )
                     elif api_err.code == 400 and "do not exist" in str(api_err):
                         # Property doesn't exist in the container/view - create schema issue
-                        logger.warning(
-                            f"Property {through_prop} not found in {source_view.external_id}: {api_err}"
-                        )
+                        logger.warning(f"Property {through_prop} not found in {source_view.external_id}: {api_err}")
                         schema_issues.append(
                             SchemaIssue(
                                 issue_type="missing_property",
@@ -1120,8 +1120,7 @@ class ValidateInstancesAPI:
                                 issue_type="api_error",
                                 severity="Error",
                                 message=(
-                                    f"API error querying reverse relation '{through_prop}' "
-                                    f"in {source_view.external_id}"
+                                    f"API error querying reverse relation '{through_prop}' in {source_view.external_id}"
                                 ),
                                 view_id=view_id_str,
                                 property_name=through_prop,
@@ -1311,19 +1310,20 @@ class ValidateInstancesAPI:
                                 if source_view_obj and prop_def.through.property in source_view_obj.properties:
                                     through_prop_def = source_view_obj.properties[prop_def.through.property]
                                     # Check if it's a list type (has isList attribute or is MultiEdgeConnection)
-                                    is_list_property = getattr(through_prop_def, 'is_list', False) or (isinstance(
-                                        through_prop_def, (dm.MappedProperty,)
-                                    ) and getattr(through_prop_def.type, 'is_list', False))
+                                    is_list_property = getattr(through_prop_def, "is_list", False) or (
+                                        isinstance(through_prop_def, (dm.MappedProperty,))
+                                        and getattr(through_prop_def.type, "is_list", False)
+                                    )
 
                                     # For MappedProperty, extract container reference for filter construction
                                     if isinstance(through_prop_def, dm.MappedProperty):
-                                        if hasattr(through_prop_def, 'container') and hasattr(
-                                            through_prop_def, 'container_property_identifier'
+                                        if hasattr(through_prop_def, "container") and hasattr(
+                                            through_prop_def, "container_property_identifier"
                                         ):
                                             container_reference = (
                                                 through_prop_def.container.space,
                                                 through_prop_def.container.external_id,
-                                                through_prop_def.container_property_identifier
+                                                through_prop_def.container_property_identifier,
                                             )
                             except Exception as e:
                                 if verbose:
@@ -1337,7 +1337,7 @@ class ValidateInstancesAPI:
                                 prop_def.source,
                                 prop_def.through.property,
                                 is_list_property,
-                                container_reference
+                                container_reference,
                             )
                             if verbose:
                                 list_marker = " (list)" if is_list_property else ""
@@ -1429,6 +1429,7 @@ class ValidateInstancesAPI:
 
 # Helper functions for SHACL template generation
 
+
 def _analyze_raw_schema(rows: list) -> dict:
     """
     Analyze RAW rows to discover column schema.
@@ -1448,14 +1449,16 @@ def _analyze_raw_schema(rows: list) -> dict:
     """
     from collections import defaultdict
 
-    column_stats = defaultdict(lambda: {
-        "types": set(),
-        "present_in": 0,
-        "nullable": False,
-    })
+    column_stats = defaultdict(
+        lambda: {
+            "types": set(),
+            "present_in": 0,
+            "nullable": False,
+        }
+    )
 
     for row in rows:
-        columns = row.columns if hasattr(row, 'columns') else row
+        columns = row.columns if hasattr(row, "columns") else row
         for col_name, value in columns.items():
             stats = column_stats[col_name]
             stats["present_in"] += 1
@@ -1542,18 +1545,20 @@ def _generate_shacl_from_schema(
 
         # Column presence shape
         shape_name = f"{namespace}:{col_name.replace('-', '_').replace(' ', '_')}Shape"
-        rules.extend([
-            f"# Column: {col_name}",
-            (
-                f"# Type: {col_schema['type']}, Present in: {col_presence:.0f}% of rows, "
-                f"Nullable: {col_schema['nullable']}"
-            ),
-            f"{shape_name}",
-            "    a sh:NodeShape ;",
-            f"    sh:targetClass {namespace}:{table_name} ;",
-            "    sh:property [",
-            f"        sh:path {namespace}:{col_name.replace('-', '_').replace(' ', '_')} ;",
-        ])
+        rules.extend(
+            [
+                f"# Column: {col_name}",
+                (
+                    f"# Type: {col_schema['type']}, Present in: {col_presence:.0f}% of rows, "
+                    f"Nullable: {col_schema['nullable']}"
+                ),
+                f"{shape_name}",
+                "    a sh:NodeShape ;",
+                f"    sh:targetClass {namespace}:{table_name} ;",
+                "    sh:property [",
+                f"        sh:path {namespace}:{col_name.replace('-', '_').replace(' ', '_')} ;",
+            ]
+        )
 
         # Add minCount if required
         if is_required:
@@ -1573,19 +1578,19 @@ def _generate_shacl_from_schema(
         # Add helpful error message
         if is_required and not col_schema["nullable"]:
             # Both required and has type constraint
-            rules.append(
-                f"        sh:message \"{col_name} is required and must be of type {col_schema['type']}\" ;"
-            )
+            rules.append(f'        sh:message "{col_name} is required and must be of type {col_schema["type"]}" ;')
         elif is_required:
             # Only required
-            rules.append(f"        sh:message \"{col_name} is required\" ;")
+            rules.append(f'        sh:message "{col_name} is required" ;')
         elif not col_schema["nullable"]:
             # Only type constraint
-            rules.append(f"        sh:message \"{col_name} must be of type {col_schema['type']}\" ;")
+            rules.append(f'        sh:message "{col_name} must be of type {col_schema["type"]}" ;')
 
-        rules.extend([
-            "    ] .",
-            "",
-        ])
+        rules.extend(
+            [
+                "    ] .",
+                "",
+            ]
+        )
 
     return "\n".join(rules)

@@ -195,9 +195,7 @@ class TestRawSHACLValidation:
         neat = NeatSession(client=cognite_client)
 
         # Get cursors for partitioned processing
-        cursors_response = cognite_client.raw.rows.get_cursors(
-            db_name=db_name, table_name=table_name, num_partitions=2
-        )
+        cursors_response = cognite_client.raw.rows.get_cursors(db_name=db_name, table_name=table_name, num_partitions=2)
 
         # Validate using first cursor
         shacl_rules = f"""

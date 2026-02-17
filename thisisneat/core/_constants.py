@@ -110,6 +110,7 @@ DEFAULT_SPACE_URI = "http://purl.org/cognite/space/{space}#"
 SPACE_URI_PATTERN = re.compile(r"http://purl.org/cognite/space/(?P<space>[^#]+)#$")
 DEFAULT_RAW_URI = "http://purl.org/cognite/raw#"
 
+
 def get_raw_namespace(db_name: str, table_name: str) -> str:
     """
     Get namespaced URI for RAW table to enable table-specific SHACL targeting.
@@ -130,6 +131,7 @@ def get_raw_namespace(db_name: str, table_name: str) -> str:
             ...
     """
     return f"http://purl.org/cognite/raw/{db_name}/{table_name}/"
+
 
 DEFAULT_NAMESPACE = Namespace("http://purl.org/cognite/neat/")
 CDF_NAMESPACE = Namespace("https://cognitedata.com/")
