@@ -879,7 +879,12 @@ class ValidateInstancesAPI:
                                             }
 
                         # Collect reverse relation queries
-                        for rev_prop_name, (source_view, through_prop, is_list_property, container_reference) in reverse_relations.items():
+                        for rev_prop_name, (
+                            source_view,
+                            through_prop,
+                            is_list_property,
+                            container_reference,
+                        ) in reverse_relations.items():
                             # Cycle detection: Check if this reverse relation chain was already processed
                             chain_key = (
                                 f"{space_key}/{view_version}",
@@ -896,7 +901,13 @@ class ValidateInstancesAPI:
                                     f"{source_view.external_id}.{through_prop}"
                                 )
                             # Include is_list_property flag and container_reference in the query key
-                            query_key = (source_view, through_prop, rev_prop_name, is_list_property, container_reference)
+                            query_key = (
+                                source_view,
+                                through_prop,
+                                rev_prop_name,
+                                is_list_property,
+                                container_reference,
+                            )
                             if query_key not in reverse_queries:
                                 reverse_queries[query_key] = (rev_prop_name, [])
                             # Unpack, append, repack (tuples are immutable)
@@ -910,11 +921,18 @@ class ValidateInstancesAPI:
             if reverse_queries and verbose:
                 print(f"    Querying {len(reverse_queries)} reverse relation types")
 
-            for (source_view, through_prop, _, is_list_property, container_reference), (rev_prop_name, target_instances) in reverse_queries.items():
+            for (
+                source_view,
+                through_prop,
+                _,
+                is_list_property,
+                container_reference,
+            ), (rev_prop_name, target_instances) in reverse_queries.items():
                 if verbose:
                     list_marker = " (list)" if is_list_property else ""
                     print(
-                        f"      Reverse: {source_view.external_id}.{through_prop}{list_marker} -> {len(target_instances)} instances"
+                        f"      Reverse: {source_view.external_id}.{through_prop}{list_marker} -> "
+                        f"{len(target_instances)} instances"
                     )
 
                 try:
@@ -1080,7 +1098,10 @@ class ValidateInstancesAPI:
                             SchemaIssue(
                                 issue_type="property_type_mismatch",
                                 severity="Error",
-                                message=f"Property '{through_prop}' in {source_view.external_id} has incompatible type for reverse relation",
+                                message=(
+                                    f"Property '{through_prop}' in {source_view.external_id} "
+                                    f"has incompatible type for reverse relation"
+                                ),
                                 view_id=view_id_str,
                                 property_name=through_prop,
                                 error_code=api_err.code,
@@ -1098,7 +1119,10 @@ class ValidateInstancesAPI:
                             SchemaIssue(
                                 issue_type="api_error",
                                 severity="Error",
-                                message=f"API error querying reverse relation '{through_prop}' in {source_view.external_id}",
+                                message=(
+                                    f"API error querying reverse relation '{through_prop}' "
+                                    f"in {source_view.external_id}"
+                                ),
                                 view_id=view_id_str,
                                 property_name=through_prop,
                                 error_code=api_err.code,
@@ -1114,7 +1138,10 @@ class ValidateInstancesAPI:
                         SchemaIssue(
                             issue_type="unexpected_error",
                             severity="Error",
-                            message=f"Unexpected error querying reverse relation '{through_prop}' in {source_view.external_id}",
+                            message=(
+                                f"Unexpected error querying reverse relation '{through_prop}' "
+                                f"in {source_view.external_id}"
+                            ),
                             view_id=view_id_str,
                             property_name=through_prop,
                             details={"error_message": str(e), "error_type": type(e).__name__},
@@ -1231,8 +1258,9 @@ class ValidateInstancesAPI:
         Returns:
             Tuple of (forward_mappings, reverse_mappings) where:
             - forward_mappings: dict[property_name, target_view_id]
-            - reverse_mappings: dict[property_name, (source_view_id, through_property, is_list_property, container_reference)]
-              where container_reference is (container_space, container_id, container_property) for MappedProperty, or None
+            - reverse_mappings: dict[property_name, (source_view_id, through_property,
+              is_list_property, container_reference)] where container_reference is
+              (container_space, container_id, container_property) for MappedProperty, or None
         """
         property_to_target_view: dict[str, dm.ViewId] = {}
         reverse_relations: dict[str, tuple[dm.ViewId, str, bool, tuple[str, str, str] | None]] = {}
@@ -1283,13 +1311,15 @@ class ValidateInstancesAPI:
                                 if source_view_obj and prop_def.through.property in source_view_obj.properties:
                                     through_prop_def = source_view_obj.properties[prop_def.through.property]
                                     # Check if it's a list type (has isList attribute or is MultiEdgeConnection)
-                                    is_list_property = getattr(through_prop_def, 'is_list', False) or isinstance(
+                                    is_list_property = getattr(through_prop_def, 'is_list', False) or (isinstance(
                                         through_prop_def, (dm.MappedProperty,)
-                                    ) and getattr(through_prop_def.type, 'is_list', False)
+                                    ) and getattr(through_prop_def.type, 'is_list', False))
 
                                     # For MappedProperty, extract container reference for filter construction
                                     if isinstance(through_prop_def, dm.MappedProperty):
-                                        if hasattr(through_prop_def, 'container') and hasattr(through_prop_def, 'container_property_identifier'):
+                                        if hasattr(through_prop_def, 'container') and hasattr(
+                                            through_prop_def, 'container_property_identifier'
+                                        ):
                                             container_reference = (
                                                 through_prop_def.container.space,
                                                 through_prop_def.container.external_id,
@@ -1297,7 +1327,10 @@ class ValidateInstancesAPI:
                                             )
                             except Exception as e:
                                 if verbose:
-                                    print(f"        Warning: Could not check property type for {prop_def.through.property}: {e}")
+                                    print(
+                                        f"        Warning: Could not check property type for "
+                                        f"{prop_def.through.property}: {e}"
+                                    )
 
                             # Store with list property flag and container reference (if MappedProperty)
                             reverse_relations[prop_name] = (
@@ -1492,13 +1525,13 @@ def _generate_shacl_from_schema(
 
     # Build SHACL document
     rules = [
-        f"@prefix sh: <http://www.w3.org/ns/shacl#> .",
-        f"@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .",
+        "@prefix sh: <http://www.w3.org/ns/shacl#> .",
+        "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .",
         f"@prefix {namespace}: <{uri_base}> .",
         "",
         f"# SHACL template for RAW table: {db_name}.{table_name}",
         f"# Auto-generated from {len(schema)} columns found in sample rows",
-        f"# Edit this template to add custom constraints (ranges, patterns, etc.)",
+        "# Edit this template to add custom constraints (ranges, patterns, etc.)",
         "",
     ]
 
@@ -1511,17 +1544,20 @@ def _generate_shacl_from_schema(
         shape_name = f"{namespace}:{col_name.replace('-', '_').replace(' ', '_')}Shape"
         rules.extend([
             f"# Column: {col_name}",
-            f"# Type: {col_schema['type']}, Present in: {col_presence:.0f}% of rows, Nullable: {col_schema['nullable']}",
+            (
+                f"# Type: {col_schema['type']}, Present in: {col_presence:.0f}% of rows, "
+                f"Nullable: {col_schema['nullable']}"
+            ),
             f"{shape_name}",
-            f"    a sh:NodeShape ;",
+            "    a sh:NodeShape ;",
             f"    sh:targetClass {namespace}:{table_name} ;",
-            f"    sh:property [",
+            "    sh:property [",
             f"        sh:path {namespace}:{col_name.replace('-', '_').replace(' ', '_')} ;",
         ])
 
         # Add minCount if required
         if is_required:
-            rules.append(f"        sh:minCount 1 ;")
+            rules.append("        sh:minCount 1 ;")
 
         # Add datatype constraint
         xsd_type = {
@@ -1541,7 +1577,7 @@ def _generate_shacl_from_schema(
             rules.append(f"        sh:message \"{col_name} must be of type {col_schema['type']}\" ;")
 
         rules.extend([
-            f"    ] .",
+            "    ] .",
             "",
         ])
 
