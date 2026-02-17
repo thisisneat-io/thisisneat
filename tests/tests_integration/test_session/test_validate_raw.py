@@ -206,8 +206,11 @@ class TestRawSHACLValidation:
         db_name, table_name = test_raw_table
         neat = NeatSession(client=cognite_client)
 
-        # Get cursors for partitioned processing
-        cursors_response = cognite_client.raw.rows.get_cursors(db_name=db_name, table_name=table_name, num_partitions=2)
+        # Get cursors for partitioned processing using REST API directly
+        # SDK doesn't expose get_cursors() yet, so we use _get() directly
+        url_path = f"/api/v1/projects/{cognite_client.config.project}/raw/dbs/{db_name}/tables/{table_name}/cursors"
+        cursors_response = cognite_client._get(url_path, params={"numPartitions": 2})
+        cursors = cursors_response.json()["items"]
 
         # Validate using first cursor
         shacl_rules = f"""
@@ -226,7 +229,7 @@ class TestRawSHACLValidation:
             db_name=db_name,
             table_name=table_name,
             shacl_rules=shacl_rules,
-            cursor=cursors_response.cursors[0],
+            cursor=cursors[0],
             verbose=False,
         )
 
