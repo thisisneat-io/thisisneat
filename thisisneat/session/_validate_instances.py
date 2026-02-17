@@ -31,6 +31,43 @@ from .exceptions import NeatSessionError, session_class_wrapper
 logger = logging.getLogger(__name__)
 
 
+class SchemaIssue:
+    """Represents a data model schema inconsistency detected during validation."""
+
+    def __init__(
+        self,
+        issue_type: str,
+        severity: str,
+        message: str,
+        view_id: str | None = None,
+        property_name: str | None = None,
+        source_view_id: str | None = None,
+        error_code: int | None = None,
+        details: dict[str, Any] | None = None,
+    ):
+        self.issue_type = issue_type  # e.g., "missing_property", "type_mismatch", "permission_denied"
+        self.severity = severity  # "Warning", "Error", "Info"
+        self.message = message
+        self.view_id = view_id  # e.g., "sp_rmdm_dm/FailureNotification/v8.11"
+        self.property_name = property_name  # e.g., "failureMode"
+        self.source_view_id = source_view_id  # e.g., "sp_rmdm_dm/FailureMode/v8.11"
+        self.error_code = error_code  # CDF API error code if applicable
+        self.details = details or {}
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        return {
+            "issue_type": self.issue_type,
+            "severity": self.severity,
+            "message": self.message,
+            "view_id": self.view_id,
+            "property_name": self.property_name,
+            "source_view_id": self.source_view_id,
+            "error_code": self.error_code,
+            "details": self.details,
+        }
+
+
 class SHACLValidationResult:
     """Result from SHACL validation. Backwards compatible - unpacks as 3 values.
 
@@ -46,6 +83,7 @@ class SHACLValidationResult:
         result.report_graph
         result.report_text
         result.new_cursor
+        result.schema_issues  # NEW: List of SchemaIssue objects
     """
 
     def __init__(
@@ -54,11 +92,13 @@ class SHACLValidationResult:
         report_graph: str,
         report_text: str,
         new_cursor: str | None = None,
+        schema_issues: list[SchemaIssue] | None = None,
     ):
         self.conforms = conforms
         self.report_graph = report_graph
         self.report_text = report_text
         self.new_cursor = new_cursor
+        self.schema_issues = schema_issues or []
 
     def __iter__(self) -> Iterator:
         """Allow unpacking as 3-tuple for backwards compatibility."""
@@ -261,8 +301,9 @@ class ValidateInstancesAPI:
                             print(f"        {prop_name}: {val_str}")
 
         # 4. Auto-load referenced instances if needed
+        schema_issues: list[SchemaIssue] = []
         if reference_map and auto_load_depth > 0:
-            loaded_count = self._auto_load_references(
+            loaded_count, schema_issues = self._auto_load_references(
                 data_graph,
                 instances,
                 reference_map,
@@ -278,6 +319,8 @@ class ValidateInstancesAPI:
             )
             if verbose:
                 print(f"  Auto-loaded {loaded_count} referenced instances")
+                if schema_issues:
+                    print(f"  Found {len(schema_issues)} schema inconsistencies")
 
         # 5. Register CDF SPARQL functions (always enabled)
         if verbose:
@@ -327,7 +370,7 @@ class ValidateInstancesAPI:
             print(f"  New subscription cursor available (length: {len(new_cursor)})")
 
         report_str = report_graph.decode("utf-8") if isinstance(report_graph, bytes) else report_graph
-        return SHACLValidationResult(conforms, report_str, report_text, new_cursor)
+        return SHACLValidationResult(conforms, report_str, report_text, new_cursor, schema_issues)
 
     def with_shacl_raw(
         self,
@@ -694,7 +737,8 @@ class ValidateInstancesAPI:
         max_instances: int = 10000,
         max_reverse_relations_per_query: int = 1000,
         verbose: bool = False,
-    ) -> int:
+        schema_issues: list[SchemaIssue] | None = None,
+    ) -> tuple[int, list[SchemaIssue]]:
         """
         Auto-load referenced instances from DMS based on sh:node constraints.
         Supports recursive loading up to max_depth levels.
@@ -702,10 +746,13 @@ class ValidateInstancesAPI:
         Args:
             max_instances: Maximum total instances to auto-load. Set to -1 for unlimited.
             max_reverse_relations_per_query: Max reverse relations per query. Set to -1 for unlimited.
+            schema_issues: List to collect schema inconsistencies found during auto-loading
 
         Returns:
-            Count of instances loaded
+            Tuple of (count of instances loaded, list of schema issues)
         """
+        if schema_issues is None:
+            schema_issues = []
         import time
 
         start_time = time.time()
@@ -832,7 +879,7 @@ class ValidateInstancesAPI:
                                             }
 
                         # Collect reverse relation queries
-                        for rev_prop_name, (source_view, through_prop) in reverse_relations.items():
+                        for rev_prop_name, (source_view, through_prop, is_list_property, container_reference) in reverse_relations.items():
                             # Cycle detection: Check if this reverse relation chain was already processed
                             chain_key = (
                                 f"{space_key}/{view_version}",
@@ -848,7 +895,8 @@ class ValidateInstancesAPI:
                                     f"        Collecting reverse query for {rev_prop_name}: "
                                     f"{source_view.external_id}.{through_prop}"
                                 )
-                            query_key = (source_view, through_prop, rev_prop_name)  # Include prop name in key
+                            # Include is_list_property flag and container_reference in the query key
+                            query_key = (source_view, through_prop, rev_prop_name, is_list_property, container_reference)
                             if query_key not in reverse_queries:
                                 reverse_queries[query_key] = (rev_prop_name, [])
                             # Unpack, append, repack (tuples are immutable)
@@ -862,10 +910,11 @@ class ValidateInstancesAPI:
             if reverse_queries and verbose:
                 print(f"    Querying {len(reverse_queries)} reverse relation types")
 
-            for (source_view, through_prop, _), (rev_prop_name, target_instances) in reverse_queries.items():
+            for (source_view, through_prop, _, is_list_property, container_reference), (rev_prop_name, target_instances) in reverse_queries.items():
                 if verbose:
+                    list_marker = " (list)" if is_list_property else ""
                     print(
-                        f"      Reverse: {source_view.external_id}.{through_prop} -> {len(target_instances)} instances"
+                        f"      Reverse: {source_view.external_id}.{through_prop}{list_marker} -> {len(target_instances)} instances"
                     )
 
                 try:
@@ -874,21 +923,37 @@ class ValidateInstancesAPI:
                     from cognite.client.data_classes import filters as dms_filters
                     from cognite.client.exceptions import CogniteAPIError
 
-                    # Create OR filter for all target instances
-                    or_filters = []
-                    for target_space, target_ext_id in target_instances:
-                        or_filters.append(
-                            dms_filters.Equals(
-                                [source_view.space, source_view.external_id, through_prop],
-                                {"space": target_space, "externalId": target_ext_id},
-                            )
-                        )
-
-                    # Combine with OR if multiple targets
-                    if len(or_filters) == 1:
-                        filter_expr = or_filters[0]
+                    # Determine property reference for filter
+                    # For MappedProperty, use container reference; otherwise use view reference
+                    if container_reference:
+                        # MappedProperty: use container space, container id, container property
+                        property_ref = [container_reference[0], container_reference[1], container_reference[2]]
                     else:
-                        filter_expr = dms_filters.Or(*or_filters)
+                        # Direct property: use view space, view id, property name
+                        property_ref = [source_view.space, source_view.external_id, through_prop]
+
+                    # Create filter based on property type
+                    if is_list_property:
+                        # For list properties, use In filter (checking if the target is in the list)
+                        # Build a list of all target instances to check
+                        target_values = [
+                            {"space": target_space, "externalId": target_ext_id}
+                            for target_space, target_ext_id in target_instances
+                        ]
+                        # Use In filter: matches if any target is in the list property
+                        filter_expr = dms_filters.In(property_ref, target_values)
+                    else:
+                        # For scalar properties, use Equals filter with OR for multiple targets
+                        or_filters = []
+                        for target_space, target_ext_id in target_instances:
+                            filter_value = {"space": target_space, "externalId": target_ext_id}
+                            or_filters.append(dms_filters.Equals(property_ref, filter_value))
+
+                        # Combine with OR if multiple targets
+                        if len(or_filters) == 1:
+                            filter_expr = or_filters[0]
+                        else:
+                            filter_expr = dms_filters.Or(*or_filters)
 
                     # Query instances with limit to prevent unbounded loading
                     query_limit = max_reverse_relations_per_query if max_reverse_relations_per_query > 0 else -1
@@ -953,9 +1018,23 @@ class ValidateInstancesAPI:
                         print(f"        Found {len(result.data)} instances")
 
                 except CogniteAPIError as api_err:
+                    # Create schema issue for all API errors during reverse relation loading
+                    view_id_str = f"{source_view.space}/{source_view.external_id}/{source_view.version}"
+
                     if api_err.code == 403:
                         logger.error(
                             f"Permission denied for reverse relation query on {source_view.external_id}: {api_err}"
+                        )
+                        schema_issues.append(
+                            SchemaIssue(
+                                issue_type="permission_denied",
+                                severity="Error",
+                                message=f"Permission denied for property '{through_prop}' in {source_view.external_id}",
+                                view_id=view_id_str,
+                                property_name=through_prop,
+                                error_code=api_err.code,
+                                details={"error_message": str(api_err)},
+                            )
                         )
                         if verbose:
                             print(
@@ -964,17 +1043,83 @@ class ValidateInstancesAPI:
                             )
                     elif api_err.code in (408, 429, 503, 504):
                         logger.warning(f"Temporary API error for reverse relation query: {api_err}")
+                        # Don't create schema issue for temporary errors
                         if verbose:
                             print(
                                 f"        WARNING: Temporary API error (code {api_err.code}) - "
                                 f"some instances may be missing"
                             )
+                    elif api_err.code == 400 and "do not exist" in str(api_err):
+                        # Property doesn't exist in the container/view - create schema issue
+                        logger.warning(
+                            f"Property {through_prop} not found in {source_view.external_id}: {api_err}"
+                        )
+                        schema_issues.append(
+                            SchemaIssue(
+                                issue_type="missing_property",
+                                severity="Warning",
+                                message=f"Property '{through_prop}' does not exist in {source_view.external_id}",
+                                view_id=view_id_str,
+                                property_name=through_prop,
+                                error_code=api_err.code,
+                                details={
+                                    "error_message": str(api_err),
+                                    "reverse_relation": rev_prop_name,
+                                },
+                            )
+                        )
+                        if verbose:
+                            print(
+                                f"        WARNING: Property '{through_prop}' does not exist in "
+                                f"{source_view.external_id} - skipping reverse relation"
+                            )
+                    elif api_err.code == 400 and "is a list" in str(api_err):
+                        # Property type issue (should have been caught earlier, but safety net)
+                        logger.error(f"Property type error in reverse relation query: {api_err}")
+                        schema_issues.append(
+                            SchemaIssue(
+                                issue_type="property_type_mismatch",
+                                severity="Error",
+                                message=f"Property '{through_prop}' in {source_view.external_id} has incompatible type for reverse relation",
+                                view_id=view_id_str,
+                                property_name=through_prop,
+                                error_code=api_err.code,
+                                details={
+                                    "error_message": str(api_err),
+                                    "reverse_relation": rev_prop_name,
+                                },
+                            )
+                        )
+                        if verbose:
+                            print(f"        ERROR: Property type issue: {api_err}")
                     else:
                         logger.error(f"API error in reverse relation query: {api_err}")
+                        schema_issues.append(
+                            SchemaIssue(
+                                issue_type="api_error",
+                                severity="Error",
+                                message=f"API error querying reverse relation '{through_prop}' in {source_view.external_id}",
+                                view_id=view_id_str,
+                                property_name=through_prop,
+                                error_code=api_err.code,
+                                details={"error_message": str(api_err)},
+                            )
+                        )
                         if verbose:
                             print(f"        ERROR: API error (code {api_err.code}): {api_err}")
                 except Exception as e:
                     logger.error(f"Unexpected error in reverse relation query: {e}", exc_info=True)
+                    view_id_str = f"{source_view.space}/{source_view.external_id}/{source_view.version}"
+                    schema_issues.append(
+                        SchemaIssue(
+                            issue_type="unexpected_error",
+                            severity="Error",
+                            message=f"Unexpected error querying reverse relation '{through_prop}' in {source_view.external_id}",
+                            view_id=view_id_str,
+                            property_name=through_prop,
+                            details={"error_message": str(e), "error_type": type(e).__name__},
+                        )
+                    )
                     if verbose:
                         print(f"        ERROR: Unexpected error: {e}")
 
@@ -1059,13 +1204,15 @@ class ValidateInstancesAPI:
             print(f"    Views retrieved: {metrics['views_retrieved']}")
             print(f"    Reverse relation queries: {metrics['reverse_queries']}")
             print(f"    Forward references found: {metrics['forward_refs']}")
+            print(f"    Schema issues found: {len(schema_issues)}")
             print(f"    Time elapsed: {elapsed_time:.2f}s")
 
         logger.info(
-            f"Auto-loading completed: {total_loaded} instances, {metrics['api_calls']} API calls, {elapsed_time:.2f}s"
+            f"Auto-loading completed: {total_loaded} instances, {metrics['api_calls']} API calls, "
+            f"{len(schema_issues)} schema issues, {elapsed_time:.2f}s"
         )
 
-        return total_loaded
+        return total_loaded, schema_issues
 
     def _get_view_property_mappings(
         self,
@@ -1074,7 +1221,7 @@ class ValidateInstancesAPI:
         view_version: str,
         view_objects_cache: dict[dm.ViewId, dm.View],
         verbose: bool = False,
-    ) -> tuple[dict[str, dm.ViewId], dict[str, tuple[dm.ViewId, str]]]:
+    ) -> tuple[dict[str, dm.ViewId], dict[str, tuple[dm.ViewId, str, bool, tuple[str, str, str] | None]]]:
         """
         Get property -> target view mappings for a view.
 
@@ -1084,10 +1231,11 @@ class ValidateInstancesAPI:
         Returns:
             Tuple of (forward_mappings, reverse_mappings) where:
             - forward_mappings: dict[property_name, target_view_id]
-            - reverse_mappings: dict[property_name, (source_view_id, through_property)]
+            - reverse_mappings: dict[property_name, (source_view_id, through_property, is_list_property, container_reference)]
+              where container_reference is (container_space, container_id, container_property) for MappedProperty, or None
         """
         property_to_target_view: dict[str, dm.ViewId] = {}
-        reverse_relations: dict[str, tuple[dm.ViewId, str]] = {}
+        reverse_relations: dict[str, tuple[dm.ViewId, str, bool, tuple[str, str, str] | None]] = {}
 
         try:
             # Parse view_version (e.g., "YourOrgAsset/v1")
@@ -1120,11 +1268,49 @@ class ValidateInstancesAPI:
                     for prop_name, prop_def in v.properties.items():
                         # Reverse direct relations (check FIRST before generic source check)
                         if isinstance(prop_def, dm.MultiReverseDirectRelation):
-                            reverse_relations[prop_name] = (prop_def.source, prop_def.through.property)
+                            # Check if the through property is a list in the source view
+                            is_list_property = False
+                            container_reference = None  # Will store (space, external_id, property) for MappedProperty
+                            try:
+                                source_view_obj = view_objects_cache.get(prop_def.source)
+                                if not source_view_obj:
+                                    # Fetch source view to check property type
+                                    source_views = client.data_modeling.views.retrieve(prop_def.source)
+                                    if source_views:
+                                        source_view_obj = source_views[0]
+                                        view_objects_cache[prop_def.source] = source_view_obj
+
+                                if source_view_obj and prop_def.through.property in source_view_obj.properties:
+                                    through_prop_def = source_view_obj.properties[prop_def.through.property]
+                                    # Check if it's a list type (has isList attribute or is MultiEdgeConnection)
+                                    is_list_property = getattr(through_prop_def, 'is_list', False) or isinstance(
+                                        through_prop_def, (dm.MappedProperty,)
+                                    ) and getattr(through_prop_def.type, 'is_list', False)
+
+                                    # For MappedProperty, extract container reference for filter construction
+                                    if isinstance(through_prop_def, dm.MappedProperty):
+                                        if hasattr(through_prop_def, 'container') and hasattr(through_prop_def, 'container_property_identifier'):
+                                            container_reference = (
+                                                through_prop_def.container.space,
+                                                through_prop_def.container.external_id,
+                                                through_prop_def.container_property_identifier
+                                            )
+                            except Exception as e:
+                                if verbose:
+                                    print(f"        Warning: Could not check property type for {prop_def.through.property}: {e}")
+
+                            # Store with list property flag and container reference (if MappedProperty)
+                            reverse_relations[prop_name] = (
+                                prop_def.source,
+                                prop_def.through.property,
+                                is_list_property,
+                                container_reference
+                            )
                             if verbose:
+                                list_marker = " (list)" if is_list_property else ""
                                 print(
                                     f"        {prop_name} <- {prop_def.source.external_id}/"
-                                    f"{prop_def.source.version} (through {prop_def.through.property})"
+                                    f"{prop_def.source.version} (through {prop_def.through.property}{list_marker})"
                                 )
                         # Forward direct relations
                         elif hasattr(prop_def, "source") and prop_def.source:
