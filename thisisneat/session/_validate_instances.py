@@ -48,9 +48,9 @@ class SchemaIssue:
         self.issue_type = issue_type  # e.g., "missing_property", "type_mismatch", "permission_denied"
         self.severity = severity  # "Warning", "Error", "Info"
         self.message = message
-        self.view_id = view_id  # e.g., "sp_rmdm_dm/FailureNotification/v8.11"
-        self.property_name = property_name  # e.g., "failureMode"
-        self.source_view_id = source_view_id  # e.g., "sp_rmdm_dm/FailureMode/v8.11"
+        self.view_id = view_id  # e.g., "my_space/MyView/v1"
+        self.property_name = property_name  # e.g., "relatedEntity"
+        self.source_view_id = source_view_id  # e.g., "my_space/RelatedView/v1"
         self.error_code = error_code  # CDF API error code if applicable
         self.details = details or {}
 
