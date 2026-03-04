@@ -779,6 +779,30 @@ class ValidateInstancesAPI:
         # Track reverse relation chains to detect cycles
         reverse_relation_chains: set[tuple[str, str]] = set()
 
+        # Track which (view, rev_prop) pairs have already logged a SHACL-skip message
+        # so we print it once per view, not once per instance
+        _logged_shacl_skips: set[tuple[str, str]] = set()
+
+        # Build SHACL-guided loading sets from reference_map.
+        # shacl_forward_props: local property names with sh:node constraints → only follow these.
+        # shacl_reverse_source_classes: class URIs that declare neat:reverseDirectRelation in
+        #   SHACL → only query reverse relations when the current instance's class is in this set.
+        _NEAT_REVERSE = "http://purl.org/cognite/neat#reverseDirectRelation"
+        shacl_forward_props: set[str] = set()
+        shacl_reverse_source_classes: set[str] = set()
+        if reference_map:
+            for source_class_uri, refs in reference_map.items():
+                for ref in refs:
+                    path_uri = ref["property_path"]
+                    if path_uri == _NEAT_REVERSE:
+                        shacl_reverse_source_classes.add(source_class_uri)
+                    else:
+                        local = path_uri.split("#")[-1] if "#" in path_uri else path_uri.split("/")[-1]
+                        shacl_forward_props.add(local)
+            if verbose:
+                print(f"  SHACL-guided loading: forward props={sorted(shacl_forward_props)}, "
+                      f"reverse-relation classes={len(shacl_reverse_source_classes)}")
+
         # Current instances to scan for references
         current_instances = list(instances)
 
@@ -853,6 +877,9 @@ class ValidateInstancesAPI:
 
                         # Collect forward relations
                         for prop_name, prop_value in props.items():
+                            # SHACL-guided: skip forward references not in sh:node constraints
+                            if shacl_forward_props and prop_name not in shacl_forward_props:
+                                continue
                             # Check if this property has references
                             if isinstance(prop_value, dict) and "externalId" in prop_value:
                                 ref_space = prop_value.get("space", datamodel_space)
@@ -887,6 +914,26 @@ class ValidateInstancesAPI:
                             is_list_property,
                             container_reference,
                         ) in reverse_relations.items():
+                            # SHACL-guided: only query reverse relations for classes that declare
+                            # neat:reverseDirectRelation in SHACL rules
+                            if reference_map:
+                                parts = view_version.split("/")
+                                view_name_part = parts[0] if parts else view_version
+                                class_uri = (
+                                    f"http://purl.org/cognite/{space_key}"
+                                    f"/{view_name_part}/{view_name_part}"
+                                )
+                                if class_uri not in shacl_reverse_source_classes:
+                                    if verbose:
+                                        skip_key = (cache_key, rev_prop_name)
+                                        if skip_key not in _logged_shacl_skips:
+                                            print(
+                                                f"        Skipping reverse relation {rev_prop_name}"
+                                                f" — {view_name_part} not in SHACL "
+                                                f"(neat:reverseDirectRelation)"
+                                            )
+                                            _logged_shacl_skips.add(skip_key)
+                                    continue
                             # Cycle detection: Check if this reverse relation chain was already processed
                             chain_key = (
                                 f"{space_key}/{view_version}",
