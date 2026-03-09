@@ -11,6 +11,7 @@ Reference:
 """
 
 import logging
+import urllib.parse
 from collections.abc import Iterator
 from typing import Any
 
@@ -672,7 +673,7 @@ class ValidateInstancesAPI:
 
         # Create subject URI based on space + externalId
         instance_ns = Namespace(f"http://purl.org/cognite/{instance_space}/")
-        subject = instance_ns[external_id]
+        subject = instance_ns[urllib.parse.quote(external_id, safe="")]
 
         # Add type and properties based on each view
         properties = instance.get("properties", {})
@@ -704,7 +705,7 @@ class ValidateInstancesAPI:
                         ref_space = prop_value.get("space", datamodel_space)
                         ref_ext_id = prop_value["externalId"]
                         ref_ns = Namespace(f"http://purl.org/cognite/{ref_space}/")
-                        obj = ref_ns[ref_ext_id]
+                        obj = ref_ns[urllib.parse.quote(ref_ext_id, safe="")]
                         graph.add((subject, predicate, obj))
                     elif isinstance(prop_value, list):
                         # List of values
@@ -713,7 +714,7 @@ class ValidateInstancesAPI:
                                 ref_space = item.get("space", datamodel_space)
                                 ref_ext_id = item["externalId"]
                                 ref_ns = Namespace(f"http://purl.org/cognite/{ref_space}/")
-                                obj = ref_ns[ref_ext_id]
+                                obj = ref_ns[urllib.parse.quote(ref_ext_id, safe="")]
                                 graph.add((subject, predicate, obj))
                             else:
                                 from rdflib import Literal
